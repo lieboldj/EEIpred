@@ -1,0 +1,86 @@
+# old
+glinter/legacy/
+glinter/scratch/
+glinter/results/
+glinter/ckpts/model*
+glinter/ckpts/t*
+glinter/ckpts/PISA*
+glinter/ckpts/EPPIC*
+glinter/ckpts/runtime*
+glinter/ckpts/compare*
+
+glinter/data/test/
+glinter/data/val/
+glinter/data/train/
+glinter/data/EPPIC_EEIN/
+glinter/data/PISA_EEIN_0.5/
+glinter/data/runtime_test/
+glinter/data/get_EPPIC_PISA.py
+glinter/data/format_change_pdb_lists.py
+glinter/data/get_validation_list.py
+glinter/data/PISA_*
+glinter/data/EPPIC_*
+glinter/data/not_working.txt
+glinter/data/PDBexonData.txt
+glinter/data/chain_info.txt
+glinter/data/int_exon_pairs.txt
+
+# examples
+glinter/examples/old
+glinter/examples/PDB
+glinter/examples/*_*.pdb
+# script to check if the matrix is loaded correctly
+glinter/examples/load_matrix.py 
+
+# externals
+glinter/external/reduce
+glinter/external/msms
+glinter/external/TaxTree
+glinter/external/hhblits-bin
+glinter/external/scripts
+glinter/external/data
+glinter/external/._*
+glinter/external/LICENSE
+glinter/external/hhsuite-3.3.0*
+glinter/external/esm-ca-atom*
+glinter/external/
+
+# scripts
+glinter/scripts/get_back*
+glinter/scripts/new_AlexNet-*
+glinter/scripts/run_folds*
+
+# JetBrains PyCharm IDE
+.idea/
+
+glinter/logs/
+glinter/models/*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# macOS dir files
+.DS_Store
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
