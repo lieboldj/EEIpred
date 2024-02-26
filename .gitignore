@@ -1,0 +1,171 @@
+# PInet
+__pycache__/
+pinet.egg-info/
+*seg
+PInet/seg/
+PInet/data/dbd/
+PInet/data/exon/
+PInet/data/our/
+PInet/data/pdb/
+PInet/data/test/
+PInet/data/create*
+PInet/data/get_*
+PInet/data/pre-*
+PInet/data/runtime*
+
+PInet/logs/
+swig*/
+swig*
+*.txt
+*.npy
+PInet/results/
+PInet/lists/
+PInet/pointnet2/
+PInet/pointnet2_ops_lib/
+PInet/io.mc
+PInet/data/io.mc
+PInet/old/utils/get_max*
+PInet/old/utils/ROC*
+PInet/old/utils/new*
+PInet/old/utils/run*
+PInet/old/plot_results.py
+PInet/old/results*
+
+# glinter
+# old
+glinter/legacy/
+glinter/scratch/
+glinter/results/
+glinter/ckpts/model*
+glinter/ckpts/t*
+glinter/ckpts/24-01-09/
+glinter/ckpts/old/
+glinter/ckpts/CONTACT*
+glinter/ckpts/RUNTIME*
+glinter/ckpts/PISA*
+glinter/ckpts/EPPIC*
+glinter/ckpts/runtime*
+glinter/ckpts/compare*
+glinter/esm
+
+glinter/data/test/
+glinter/data/val/
+glinter/data/train/
+glinter/data/EPPIC_EEIN/
+glinter/data/PISA_EEIN_0.5/
+glinter/data/runtime_test/
+glinter/data/get_EPPIC_PISA.py
+glinter/data/format_change_pdb_lists.py
+glinter/data/get_validation_list.py
+glinter/data/PISA_*
+glinter/data/EPPIC_*
+glinter/data/not_working.txt
+glinter/data/PDBexonData.txt
+glinter/data/chain_info.txt
+glinter/data/int_exon_pairs.txt
+
+# examples
+glinter/examples/old
+glinter/examples/PDB
+glinter/examples/*_*.pdb
+# script to check if the matrix is loaded correctly
+glinter/examples/load_matrix.py 
+
+# externals
+glinter/external/reduce
+glinter/external/msms
+glinter/external/TaxTree
+glinter/external/hhblits-bin
+glinter/external/scripts
+glinter/external/data
+glinter/external/._*
+glinter/external/LICENSE
+glinter/external/hhsuite-3.3.0*
+glinter/external/esm-ca-atom*
+glinter/external/
+
+# scripts
+glinter/scripts/get_back*
+glinter/scripts/new_AlexNet-*
+glinter/scripts/run_folds*
+
+# JetBrains PyCharm IDE
+.idea/
+
+glinter/logs/
+glinter/models/*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# dmasif
+dmasif/surface_data/raw/01-benchmark_surfaces_npy/*
+dmasif/surface_data/raw/01-benchmark_pdbs/*
+dmasif/shape_index/
+dmasif/masif_preds/
+dmasif/runs/
+dmasif/models/
+dmasif/venv/
+dmasif/preds/
+dmasif/*.log
+dmasif/NeurIPS_2020_benchmarks/
+dmasif/*.out
+dmasif/figures/
+dmasif/timings/
+dmasif/data_analysis/roc_curves
+dmasif/data_analysis/.ipynb_checkpoints/
+dmasif/.ipynb_checkpoints/
+dmasif/results/
+
+
+# C extensions
+*.so
+
+# macOS dir files
+.DS_Store
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.pdf
+
+
+# EEIP ignore
+results/
+ppDL_models/
+run_experiments/run_results_random.sh
+
+# add example pdbs
+!dmasif/surface_data/raw/01-benchmark_pdbs/1efx_A.pdb
+!dmasif/surface_data/raw/01-benchmark_pdbs/1efx_C.pdb
+
+
+analyse_results/intermed_scripts/
+
+# our data folders
+data_collection/analysis
+data_collection/delete_folder
+data_collection/GT*
+data_collection/*.py
+data_collection/uniprot_EnsemblExonPDB_map_*
+data_collection/uniprot_EnsemblExonPDB_map/*
+!data_collection/uniprot_EnsemblExonPDB_map/P10321_1efx_A.txt
+!data_collection/uniprot_EnsemblExonPDB_map/P52292_1efx_C.txt
+data_collection/cv_splits/*
+!data_collection/cv_splits/EXAMPLE
