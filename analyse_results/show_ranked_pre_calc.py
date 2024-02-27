@@ -288,16 +288,16 @@ for l, pp in enumerate(pps):
         #ax1.set_title("(a) RRI prediction", fontsize=font_size)
 
 plt.xticks(x, fontsize=font_size)
-plt.xlabel("Decision threshold", fontsize=font_size, labelpad=15)
+plt.xlabel("False Discovery Rate (FDR)", fontsize=font_size, labelpad=15)
 plt.ylabel("Number of performance tests", fontsize=font_size, labelpad=15)
 if pp=="Max":
-    plt.legend(loc='lower left', ncol=1, fontsize=font_size-1, bbox_to_anchor=(1, 0.15))
+    plt.legend(loc='lower left', ncol=1, fontsize=font_size-2, bbox_to_anchor=(1, 0.15))
 else:
-    plt.legend(loc='lower right', ncol=3, fontsize=font_size-1)
+    plt.legend(loc='lower right', ncol=3, fontsize=font_size-2)
 
 # set grid for x axes only
 #plt.grid(axis='y')
-plt.savefig(f"../results/plots/ranked/ranking_45_0214{pp}.png", dpi=600, bbox_inches='tight')
+plt.savefig(f"../results/plots/ranked/ranking_45_0225{pp}.png", dpi=600, bbox_inches='tight')
 
 
 

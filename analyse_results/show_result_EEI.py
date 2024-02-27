@@ -147,7 +147,7 @@ ax.set_yticklabels(y_ticks, fontsize=font_size)
 if sampling_on:
     plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_samp.png", dpi=600, bbox_inches='tight')
 else:
-    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_DLs0213.png", dpi=600, bbox_inches='tight')
+    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_DL0225.png", dpi=600, bbox_inches='tight')
 
 # print the hight of each bar with its label
 for i, (key, value) in enumerate(data.items()):
