@@ -148,8 +148,13 @@ wheels/
 
 # EEIP ignore
 results/
-ppDL_models/
+ppDL_models/*
+!ppDL_models/dmasif
+ppDL_models/dmasif/CONTACT
+ppDL_models/dmasif/PISA
+ppDL_models/dmasif/EPPIC
 run_experiments/run_results_random.sh
+analyse_results/plots
 
 # add example pdbs
 !dmasif/surface_data/raw/01-benchmark_pdbs/1efx_A.pdb
