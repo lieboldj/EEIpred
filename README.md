@@ -39,12 +39,27 @@ cat requirements.txt | xargs -L 1 pip install
 
 ### 4. Clone the repository
 ```bash
-git clone https://gitlab.rrz.uni-hamburg.de/bax4015/eeip
+git clone https://github.com/lieboldj/EEIpred
 cd eeip/
 ```
 
 ## Usage
-Given two pdb files which are representing the pair of proteins for predicting the EEI:
+We provide an example with two input pdb files and the corresponding exon mapping files to predict the exon-exon interactions for these two proteins. 
+
+### Prediction of EEIs
+To predict the exon-exon interactions between the examples 1efx_C and 1efx_A, run
+
+```bash
+./get_eeip.sh
+```
+You find the predictions in the folder which will be displayed.
+For details regarding dmasif environment, we refer to the original [dMaSIF github](https://github.com/FreyrS/dMaSIF).
+
+### Reproducing our results
+You can download all our pre-trained model running:
+
+
+If you want to reproduce all our results, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
 
 ### Adding hydrogen atoms to PDB files
 If you have PDB files and need to add hydrogen atoms, you can use the software "reduce." Reduce is a program for adding hydrogens to a protein structure given the 3D coordinates of the heavy atoms. 
@@ -55,18 +70,14 @@ To install Reduce and learn how to use it, you can refer to the [Reduce GitHub r
 reduce -build -Quiet XXX.pdb > XXX.pdb
 ```
 
-### Prediction of EEIs
-To predict the exon-exon interactions between 1efx_C and 1efx_A, run
+To run our prediction, you need to follow these steps:
 
-```bash
-./get_eeip.sh
-```
-You find the predictions in the folder which will be displayed.
-For details regarding dmasif, we refer to the original [dMaSIF github](https://github.com/FreyrS/dMaSIF).
+Please add the pdb files in _EEIpred/dmasif/surface_data/raw/01-benchmark_pdbs_, add the pdb names in _EEIpred/data_collection/cv_splits/EXAMPLE/test1.txt_ and the protein names in _EEIpred/data_collection/cv_splits/EXAMPLE/test_info1.txt_. Add the protein to exon mapping file to the folder _EEIpred/data_collection/uniprot_EnsemblExonPDB_map_. After these steps, you get the predictions for your protein pair runnning: ```./get_eeip.sh```.
 
 ## License
-ADD the LICENCE! Check LICENSE file!
+This work is licensed under a Creative Commons Attribution 4.0 International Public License.
+
 
 ## Reference
-Liebold J, Del Moral Morales A, Manalastas-Cantos K, Tsoy O, Kurtz S, Baumbach J, Newaz K (2024). The power and limits of protein 3D structure-based exon-exon interaction prediction. [bioRxiv](https://www.biorxiv.org/).
+Liebold J, Del Moral Morales A, Manalastas-Cantos K, Tsoy O, Kurtz S, Baumbach J, Newaz K (2024). The power and limits of protein 3D structure-based exon-exon interaction prediction. [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.03.01.582917v1)
 
