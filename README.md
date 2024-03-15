@@ -56,8 +56,10 @@ You find the predictions in the folder which will be displayed.
 For details regarding dmasif environment, we refer to the original [dMaSIF github](https://github.com/FreyrS/dMaSIF).
 
 ### Reproducing our results
-You can download all our pre-trained model running:
-
+You can download all our pre-trained models and dataset list via: 
+```bash
+./download_supp_data.sh
+```
 
 If you want to reproduce all our results, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
 
@@ -70,7 +72,7 @@ To install Reduce and learn how to use it, you can refer to the [Reduce GitHub r
 reduce -build -Quiet XXX.pdb > XXX.pdb
 ```
 
-To run our prediction, you need to follow these steps:
+To run our prediction for your own pair of proteins, you need to follow these steps:
 
 Please add the pdb files in _EEIpred/dmasif/surface_data/raw/01-benchmark_pdbs_, add the pdb names in _EEIpred/data_collection/cv_splits/EXAMPLE/test1.txt_ and the protein names in _EEIpred/data_collection/cv_splits/EXAMPLE/test_info1.txt_. Add the protein to exon mapping file to the folder _EEIpred/data_collection/uniprot_EnsemblExonPDB_map_. After these steps, you get the predictions for your protein pair runnning: ```./get_eeip.sh```.
 
