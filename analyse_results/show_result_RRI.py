@@ -282,10 +282,10 @@ y_ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
 plt.yticks(y_ticks, fontsize=font_size)
 #ax.set_yticklabels(y_ticks, fontsize=font_size)
 # Show the plot
-if sampling_on:
-    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_samp.png", dpi=600, bbox_inches='tight')
-else:
-    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_AAonly_0213.png", dpi=600, bbox_inches='tight')
+#if sampling_on:
+#    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_samp.png", dpi=600, bbox_inches='tight')
+#else:
+#    plt.savefig(f"../results/plots/bar/bar_plot_{metric_string}_AAonly_0213.png", dpi=600, bbox_inches='tight')
 
 # print the hight of each bar with its label
 for i, (key, value) in enumerate(data.items()):

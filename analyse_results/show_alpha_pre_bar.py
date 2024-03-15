@@ -77,7 +77,7 @@ for l, pp in enumerate(pps):
     fontsize = 19
 
     ### barplot + error
-    idx = 3
+    idx = 6
     for i in range(3):
         if i == 0:
             thresholds = [i - 0.0025 for i in thresholds]    
@@ -105,5 +105,5 @@ for l, pp in enumerate(pps):
                          
     plt.legend(fontsize=fontsize, loc='lower center', ncol=3)
     plt.tight_layout()
-    plt.savefig(f"../results/plots/precision_thres/results_thes{pp}_pre_{idx}_0224.png", dpi=300)
+    plt.savefig(f"../results/plots/precision_thres/check_results_thes{pp}_pre_{idx}_0301.png", dpi=300)
     plt.close()
