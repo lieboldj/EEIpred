@@ -5,11 +5,11 @@ url_data="https://figshare.com/ndownloader/files/45074818"
 url_pretrained="https://figshare.com/ndownloader/files/45074824"
 
 # Directory where you want to save the downloaded zip file
-download_dir="./"
+download_dir="."
 
-# Download the zip file
-wget "$url_data" -P "$download_dir"
-wget "$url_pretrained" -P "$download_dir"
+# Download the zip file into the download directory
+wget -O "$download_dir/datasets.zip" "$url_data"
+wget -O "$download_dir/pre-trained_models.zip" "$url_pretrained"
 
 # unzip the two files
 # url_data is called "datasets.zip"
@@ -30,6 +30,8 @@ mkdir -p "$download_dir/PInet/old/seg"
 for i in {1..5}
 do
   mkdir -p "$download_dir/glinter/ckpts/CONTACT/train$i"
+  mkdir -p "$download_dir/glinter/ckpts/EPPIC/train$i"
+  mkdir -p "$download_dir/glinter/ckpts/PISA/train$i"
 done
 
 # move the pre-trained models to the correct directory for PPDL
@@ -41,18 +43,25 @@ mv "$download_dir/pre-trained_models/PInet/CONTACT" "$download_dir/ppDL_models/P
 mv "$download_dir/pre-trained_models/PInet/EPPIC" "$download_dir/ppDL_models/PInet/"
 mv "$download_dir/pre-trained_models/PInet/PISA" "$download_dir/ppDL_models/PInet/"
 
-mv "$download_dir/pre-trained_models/glinter/CONTACT/fold*.pth" "$download_dir/ppDL_models/glinter/"
-mv "$download_dir/pre-trained_models/glinter/EPPIC/fold*.pth" "$download_dir/ppDL_models/glinter/"
-mv "$download_dir/pre-trained_models/glinter/PISA/fold*.pth" "$download_dir/ppDL_models/glinter/"
-
+for i in {1..5}
+do
+  mv "$download_dir/pre-trained_models/glinter/CONTACT/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
+  mv "$download_dir/pre-trained_models/glinter/EPPIC/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
+  mv "$download_dir/pre-trained_models/glinter/PISA/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
+done
 # move the pre-trained models to the correct directory for the 3 baseline methods
-mv "$download_dir/pre-trained_models/dmasif/*_CONTACT" "$download_dir/dmasif/models/"
-mv "$download_dir/pre-trained_models/dmasif/*_EPPIC" "$download_dir/dmasif/models/"
-mv "$download_dir/pre-trained_models/dmasif/*_PISA" "$download_dir/dmasif/models/"
-
-mv "$download_dir/pre-trained_models/PInet/*_CONTACT*.pth" "$download_dir/PInet/old/seg/"
-mv "$download_dir/pre-trained_models/PInet/*_EPPIC*.pth" "$download_dir/PInet/old/seg/"
-mv "$download_dir/pre-trained_models/PInet/*_PISA*.pth" "$download_dir/PInet/old/seg/"
+for i in {1..5}
+do
+  mv "$download_dir/pre-trained_models/dmasif/dMaSIF_search_3layer_12_"$i"_CONTACT" "$download_dir/dmasif/models/"
+  mv "$download_dir/pre-trained_models/dmasif/dMaSIF_search_3layer_12_"$i"_EPPIC" "$download_dir/dmasif/models/"
+  mv "$download_dir/pre-trained_models/dmasif/dMaSIF_search_3layer_12_"$i"_PISA" "$download_dir/dmasif/models/"
+done
+for i in {0..4}
+do
+  mv "$download_dir/pre-trained_models/PInet/seg_model__CONTACT_"$i"_best.pth" "$download_dir/PInet/old/seg/"
+  mv "$download_dir/pre-trained_models/PInet/seg_model__EPPIC_"$i"_best.pth" "$download_dir/PInet/old/seg/"
+  mv "$download_dir/pre-trained_models/PInet/seg_model__PISA_"$i"_best.pth" "$download_dir/PInet/old/seg/"
+done
 
 # move the pre-trained models to the correct directory for glinter
 #write a for loop for i 1..5
@@ -60,7 +69,7 @@ for j in {1..5}
 do
   mv "$download_dir/pre-trained_models/glinter/CONTACT/model_"$j"_best.pt" "$download_dir/glinter/ckpts/CONTACT/train$j/"
   mv "$download_dir/pre-trained_models/glinter/EPPIC/model_"$j"_best.pt" "$download_dir/glinter/ckpts/EPPIC/train$j/"
-    mv "$download_dir/pre-trained_models/glinter/PISA/model_"$j"_best.pt" "$download_dir/glinter/ckpts/PISA/train$j/"
+  mv "$download_dir/pre-trained_models/glinter/PISA/model_"$j"_best.pt" "$download_dir/glinter/ckpts/PISA/train$j/"
 done
 
 # remove the pre-trained models folder and datasets folder
