@@ -168,4 +168,4 @@ data_collection/uniprot_EnsemblExonPDB_map/*
 !data_collection/uniprot_EnsemblExonPDB_map/P10321_1efx_A.txt
 !data_collection/uniprot_EnsemblExonPDB_map/P52292_1efx_C.txt
 data_collection/cv_splits/*
-!data_collection/cv_splits/EXAMPLE
+!data_collection/cv_splits/EXAMPLE/*
