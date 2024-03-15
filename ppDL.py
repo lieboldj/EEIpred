@@ -254,7 +254,10 @@ if optn.mode == "test":
 
         pos = np.asarray(pos)
         neg = np.asarray(neg)
-
+        if optn.dataset == "EXAMPLE":
+            print("pair\t\t\t\t\t\t\tprediction\tlabel")
+            for i in results_per_fold:
+                print(i[0], i[1], i[2])
         # write results_per_fold to file
         # for readable format
         if optn.method == "dmasif":
