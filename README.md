@@ -56,12 +56,11 @@ You find the predictions in the folder which will be displayed.
 For details regarding dmasif environment, we refer to the original [dMaSIF github](https://github.com/FreyrS/dMaSIF).
 
 ### Reproducing our results
-You can download all our pre-trained models and dataset list via: 
+You can download all our pre-trained models and dataset list which gets automatically directed to the correct paths via: 
 ```bash
 ./download_supp_data.sh
 ```
-
-If you want to reproduce all our results, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
+We explain the steps for collecting the pdb files and creating the exon mapping files in our paper to reproduce the results. If you are interested in using our data, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
 
 ### Adding hydrogen atoms to PDB files
 If you have PDB files and need to add hydrogen atoms, you can use the software "reduce." Reduce is a program for adding hydrogens to a protein structure given the 3D coordinates of the heavy atoms. 
