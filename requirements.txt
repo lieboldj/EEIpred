@@ -1,0 +1,15 @@
+torch --index-url https://download.pytorch.org/whl/cu121
+biopython==1.78
+torch-cluster -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
+torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
+torch-sparse -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
+torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
+torch-geometric
+pykeops
+plyfile
+pyvtk
+pandas
+matplotlib
+seaborn
+statsmodels
+pyarrow

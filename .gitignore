@@ -177,3 +177,5 @@ data_collection/cv_splits/*
 !data_collection/cv_splits/EXAMPLE
 !dmasif/models/EXAMPLE
 !dmasif/models/EXAMPLE/*
+
+!./requirements.txt
