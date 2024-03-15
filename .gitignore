@@ -105,7 +105,7 @@ dmasif/surface_data/raw/01-benchmark_pdbs/*
 dmasif/shape_index/
 dmasif/masif_preds/
 dmasif/runs/
-dmasif/models/
+dmasif/models/*
 dmasif/venv/
 dmasif/preds/
 dmasif/*.log
@@ -170,3 +170,5 @@ data_collection/uniprot_EnsemblExonPDB_map/*
 data_collection/cv_splits/*
 !data_collection/cv_splits/EXAMPLE/*
 !data_collection/cv_splits/EXAMPLE
+!dmasif/models/EXAMPLE
+!dmasif/models/EXAMPLE/*
