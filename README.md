@@ -60,7 +60,7 @@ You can download all our pre-trained models and dataset list which gets automati
 ```bash
 ./download_supp_data.sh
 ```
-We explain the steps for collecting the pdb files and creating the exon mapping files in our paper to reproduce the results. If you are interested in using our data, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
+We explain the steps for collecting the pdb files and creating the exon mapping files in our paper to reproduce the results. You can also create them yourself in an R environment by running the [R-code](https://github.com/lieboldj/EEIpred/tree/master/data_collection/scripts) in our git repo. If you are interested in using our data, please contact [Khalique Newaz](khalique.newaz@uni-hamburg.de). 
 
 ### Adding hydrogen atoms to PDB files
 If you have PDB files and need to add hydrogen atoms, you can use the software "reduce." Reduce is a program for adding hydrogens to a protein structure given the 3D coordinates of the heavy atoms. 
