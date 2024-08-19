@@ -37,7 +37,7 @@ def get_results(alphas, pos_dist, neg_dist, background):
     return prec, rec, fscores
 
 parser = argparse.ArgumentParser(description='Test significance.')
-parser.add_argument('-m', '--method', type=str, default="dMaSIF,PInet,GLINTER", help='Methods to test')
+parser.add_argument('-m', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')
 parser.add_argument('-p', '--pp', type=str, default="DL", help='Preprocessings to test')
 parser.add_argument('-d', '--dataset', type=str, default="CONTACT,PISA,EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=bool, default=True, help='Sampling on or off')
@@ -48,6 +48,7 @@ pps = args.pp.split(",")
 datasets = args.dataset.split(",")
 sampling_on = args.sampling
 auroc_on = args.auroc
+evals = ["Precision", "Recall", "Fscore", "MCC"]
 
 
 thresholds = [i / 100 for i in range(1, 6)]
@@ -57,247 +58,129 @@ fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=(12, 10), sharex=True)
 fig, ax1 = plt.subplots(1)#subplots(1, figsize=(12, 4), sharex=True)
 thresholds = [0.01,0.02,0.03,0.04,0.05]
 print(thresholds)
-ranked_results = np.zeros((len(thresholds), 9, 3, 5))
-roc_aucs = np.zeros((len(thresholds), 9))
-# get ranked results precision, recall, and f-score
-for l, pp in enumerate(pps):
-    print(pp)
-    print("dMaSIF", "PInet", "GLINTER")
-    print("F-score")
-    print("Precision")
-    print("Recall")
+# for each threshold load the stored dict into one big dict
+# 5 methods, 3 metrics, 5 thresholds
+ranked_results = np.zeros((len(thresholds), len(methods), len(datasets), len(evals), 5))
+for t, threshold in enumerate(thresholds):
+        # load the results
+        if os.path.exists(f"../results/plots/all_{threshold}.npy"):
+            data = np.load(f"../results/plots/all_{threshold}.npy", allow_pickle=True).item() 
+        for j, method in enumerate(methods):
+            for i, dataset in enumerate(datasets):
+                for k, metric in enumerate(evals):
+                    if data[f"{method} {dataset} - {pps[0]} - {metric}"].flatten().shape[0] != 5:
+                        print(metric)
+                        print(dataset)
+                        print("ERROR")
+                        print(data[f"{method} {dataset} - {pps[0]} - {metric}"].flatten().shape)
+                        ranked_results[t, j, i, k, :4] = data[f"{method} {dataset} - {pps[0]} - {metric}"].flatten()
+                        ranked_results[t, j, i, k, -1] = np.nan
+                        continue
+                    ranked_results[t, j, i, k] = data[f"{method} {dataset} - {pps[0]} - {metric}"].flatten()
 
-    ranked_results = np.load(f"../results/pre-calc/ranked_results_data_{pp}_perFold.npy")
-    
-    # 
-    print(ranked_results.shape)
-    
-    #print(ranked_results)
-    #print("0,01: ", ranked_results[0])
-    #print("0,05: ", ranked_results[4])
-    #print("0,1: ", ranked_results[8])
-    #print(ranked_results.shape)
-    # write results to file
-    # rows are methods + pp + dataset and columns are metric (F-score, precision, recall)
-    # + threshold (0.01, 0.05, 0.1)
-    # write to file
-    #list_e= ["dMaSIF", "PInet", "GLINTER"]
-    #with open(f"results/plots/ranked_results_data_{pp}.txt", "w") as f:
-    #    for k in range(3):
-    #        f.write(list_e[k] + "\n")
-    #        #f.write(str(list_e[k]) + ",")
-    #        for i in [0,1,2,3,4]: # threshold
-    #            f.write("Threshold: " + str(thresholds[i]) + "\n")
-    #            f.write("CONTACT\n")
-    #            for j in [0,1,2]:
-    #                for n in range(5):
-    #                    f.write("," +str(ranked_results[i, j, k, n]))
-    #                #f.write(str(ranked_results[i, j, k]) + ",")
-    #            f.write("\n")
-    #            f.write("PISA\n")
-    #            for j in [3,4,5]:
-    #                for n in range(5):
-    #                    f.write("," + str(ranked_results[i, j, k, n]))
-    #                #f.write(str(ranked_results[i, j, k]) + ",")
-    #            f.write("\n")
-    #            f.write("EPPIC\n")
-    #            for j in [6,7,8]:
-    #                for n in range(5):
-    #                    f.write("," + str(ranked_results[i, j, k, n]))
-    #                #f.write(str(ranked_results[i, j, k]) + ",")
-    #            f.write("\n")
-    #        f.write("\n")
-#
+print(ranked_results.shape)
+# Step 1: Get the max values across the last three dimensions (axis 2, 3, 4).
+counts = np.zeros((ranked_results.shape[0], ranked_results.shape[1]), dtype=int)
+for t in range(len(thresholds)):
+    # Get the indices of the maximum values along the first dimension.
+    max_indices = np.argmax(ranked_results[t], axis=0)  # Shape will be (3, 4, 5)
 
-    #print(ranked_results.shape)
-    #print(len(thresholds))
-    
-    ranking = np.zeros((len(thresholds), 3))
-    # get the absolute numbers of how often a method is best
-    #for i in range(len(thresholds)):
-    #    #print(thresholds[i])
-    #    for m in range(9):
-    #        #print(ranked_results[i, m, :].shape, ranked_results[i, m, :])
-    #        if np.argmax(ranked_results[i, m]) == 0:
-    #            ranking[i, 0] += 1
-    #        elif np.argmax(ranked_results[i, m]) == 1:
-    #            ranking[i, 1] += 1
-    #        elif np.argmax(ranked_results[i, m]) == 2:
-    #            ranking[i, 2] += 1
+    # Count how many times each approach is the best.
+    #counts = np.zeros(ranked_results[t].shape[0], dtype=int)  # Shape (5,)
+    for i in range(max_indices.shape[0]):
+        for j in range(max_indices.shape[1]):
+            for k in range(max_indices.shape[2]):
+                counts[t, max_indices[i, j, k]] += 1
 
-    for i in range(5):
-        for m in range(9):
-            for n in range(5):
-                #print(ranked_results[i, m, :,n].shape)
-                if np.argmax(ranked_results[i, m, :,n]) == 0:
-                    #ranked_results[i, m, 0,n] = 1
-                    #print("dMaSIF: ", m,n)
-                    ranking[i, 0] += 1
-                elif np.argmax(ranked_results[i, m, : ,n]) == 1:
-                    #ranked_results[i, m, 1,n] = 1
-                    ranking[i, 1] += 1
-                    #print("PInet: ", m,n)
-                elif np.argmax(ranked_results[i, m, :,n]) == 2:
-                    #ranked_results[i, m, 2,n] = 1
-                    ranking[i, 2] += 1
-                    #print("GLINTER: ", m,n)
+# Display the result
+print("Counts of how often each approach is the best:")
+print(counts)
+# Define the number of groups and bars
+num_groups, num_bars = counts.shape
 
-    font_size = 16
-    #plt.figure(figsize=(10, 5))
-    x = np.arange(len(thresholds))
-    x = ["1%", "2%", "3%", "4%", "5%"]
-    width = 0.6  # Adjust the width of the bars as needed
-    # Plot the bars with stacked colors
-    if l == 2:
-        ax3.bar(x, ranking[:, 0], width, label="dMaSIF", color='#0000a7', alpha=0.7)
-        ax3.bar(x, ranking[:, 1], width, bottom=ranking[:, 0], label="PInet", color='#008176', alpha=0.7)
-        ax3.bar(x, ranking[:, 2], width, bottom=ranking[:, 0] + ranking[:, 1], label="GLINTER", color='#eecc16', alpha=0.7)
-        #a31.set_xticks(x, thresholds, fontsize=font_size)
-        ax3.set_yticks(range(1,10, 2))# fontsize=font_size)
-        ax3.set_title("(c) EEI prediction using PPDL", fontsize=font_size)
-        ax3.yaxis.set_tick_params(labelsize=font_size)
-        ax3.set_ylim(0, 9)
-    if l == 1:
-        ax2.bar(x, ranking[:, 0], width, label="dMaSIF", color='#0000a7', alpha=0.7)
-        ax2.bar(x, ranking[:, 1], width, bottom=ranking[:, 0], label="PInet", color='#008176', alpha=0.7)
-        ax2.bar(x, ranking[:, 2], width, bottom=ranking[:, 0] + ranking[:, 1], label="GLINTER", color='#eecc16', alpha=0.7)
-        #ax2.set_xticks(x, thresholds, fontsize=font_size)
-        #ax2.set_yticks(range(1,10, 2))
-        ax2.set_yticks(range(0,46, 5))
-        ax2.set_ylim(0, 9)
-        ax2.set_ylabel("Absolute number of top ranks (out of 9)", fontsize=font_size)
-        ax2.set_title("(b) EEI prediction using PPMax", fontsize=font_size)
-        ax2.yaxis.set_tick_params(labelsize=font_size)
-        ax2.set_ylim(0, 45)  
-        offset = 3
-        for rect in bar1:
-            height = rect.get_height()
-            if height == 0:
-                continue
-            if height < offset:
-                print(rect.get_height())
-                continue
-            ax2.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size,
+# Define the x locations for the groups
+indices = np.arange(num_groups)
+
+# Define the colors for the bars
+colors = ["#0000a7", "#008176", "#eecc16", "#d62728"]
+colors = ["tab:blue", "tab:orange", "tab:green", "tab:purple"]
+# Create the plot
+fig, ax = plt.subplots()
+
+# Plot the bars
+bottom = np.zeros(num_groups)
+for i in range(num_bars):
+    bars = ax.bar(indices, counts[:, i], bottom=bottom, color=colors[i], label=methods[i])#color=colors[i], 
+    # Add text annotations
+    for bar, value in zip(bars, counts[:, i]):
+        if value > 3:
+            height = bar.get_height()
+            ax.text(
+                bar.get_x() + bar.get_width() / 2, 
+                bar.get_y() + height / 2, 
+                f'{value}', 
+                ha='center', 
+                va='center', 
                 color='white'
             )
-        for i, rect in enumerate(bar2):
-            height = rect.get_height()# + ranking[:, 0]
-            if height == 0:
-                continue
-            height += ranking[i, 0]
-            if height < offset:
-                print(rect.get_height())
-                continue
-            ax2.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size
-            )
+    bottom += counts[:, i]
 
-        for i, rect in enumerate(bar3):
-            height = rect.get_height()# + ranking[:, 0] + ranking[:, 1]
-            if height == 0:
-                continue
-            height += ranking[i, 0] + ranking[i, 1]
-            if height < offset:
-                print(rect.get_height())
-                continue
-            ax2.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size
-            )
-        # set xticks to 1%...5%
-        #ax2.set_xticks(x)
-        #ax2.set_yticks(fontsize=font_size)
-    if l == 0:
-        bar1 = ax1.bar(x, ranking[:, 0], width, label="dMaSIF", color='#0000a7', alpha=0.7)
-        bar2 = ax1.bar(x, ranking[:, 1], width, bottom=ranking[:, 0], label="PInet", color='#008176', alpha=0.7)
-        bar3 = ax1.bar(x, ranking[:, 2], width, bottom=ranking[:, 0] + ranking[:, 1], label="GLINTER", color='#eecc16', alpha=0.7)
-        #a13.set_xticks(x, thresholds, fontsize=font_size)
-        ax1.set_yticks(range(0,46, 5))
-        #ax1.set_yticks([]*9)
-        ax1.yaxis.set_tick_params(labelsize=font_size)
-        ax1.set_ylim(0, 45)  
-        offset = 3
-        for rect in bar1:
-            height = rect.get_height()
-            if height == 0:
-                continue
-            if height < offset:
-                print(rect.get_height())
-                continue
-            ax1.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size,
-                color='white'
-            )
-        for i, rect in enumerate(bar2):
-            height = rect.get_height()# + ranking[:, 0]
-            if height == 0:
-                continue
-            if height < offset:
-                print(rect.get_height())
-                continue
-            height += ranking[i, 0]
-            
-            ax1.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size
-            )
+# Set the xticks and labels
+ax.set_xticks(indices)
+ax.set_xticklabels([f'{i+1}%' for i in indices])
+ax.set_title(pps[0])
+# Set the y-axis limit
+ax.set_ylim(0, 60)
 
-        for i, rect in enumerate(bar3):
-            height = rect.get_height()# + ranking[:, 0] + ranking[:, 1]
-            if height == 0:
-                continue
-            if height < offset:
-                print(rect.get_height())
-                continue
-            height += ranking[i, 0] + ranking[i, 1]
-            
-            ax1.text(
-                rect.get_x() + rect.get_width() / 2,
-                height - offset,  # Adjust the vertical position of the text
-                f'{int(rect.get_height())}',
-                ha='center',
-                va='bottom',
-                fontsize=font_size
-            )
-       
-        #a13.set_yticks(fontsize=font_size)
-        #ax1.set_title("(a) RRI prediction", fontsize=font_size)
+# Add labels and title
+ax.set_xlabel('False Discovery Rate (FDR)')
+ax.set_ylabel('Number if performance tests')
 
-plt.xticks(x, fontsize=font_size)
-plt.xlabel("False Discovery Rate (FDR)", fontsize=font_size, labelpad=15)
-plt.ylabel("Number of performance tests", fontsize=font_size, labelpad=15)
-if pp=="Max":
-    plt.legend(loc='lower left', ncol=1, fontsize=font_size-2, bbox_to_anchor=(1, 0.15))
-else:
-    plt.legend(loc='lower right', ncol=3, fontsize=font_size-2)
+# Add a legend
+ax.legend(ncol=4, loc='lower center')
 
-# set grid for x axes only
-#plt.grid(axis='y')
-plt.savefig(f"../results/plots/ranked/ranking_45_0225{pp}.png", dpi=600, bbox_inches='tight')
+#Save figure
+plt.savefig(f'plots/{pps[0]}_ranked.png', dpi=300)
 
 
+# create bar plots with error bar for Fscore only but the 5 different thresholds
+# take the mean over the last dimension and get the standard deviation over the last dimension
+# Step 2: Calculate the mean and standard deviation of the F-scores.
+mean_fscore = np.nanmean(ranked_results, axis=4)
+std_fscore = np.nanstd(ranked_results, axis=4)
+print(mean_fscore.shape)
+# Step 3: Plot the results.
+fig, ax = plt.subplots()
 
+# Select the relevant data
+x_ticks = np.arange(mean_fscore.shape[0])  # dim0
+mean_values_0 = mean_fscore[:, :, 2, 2]    # 1 = PISA
+std_values_0 = std_fscore[:, :, 2, 2]      # 1 = PISA
+
+# Bar Width to fit 5 bars in one group
+bar_width = 0.15
+
+# Plotting the bars with height mean and error bars with std
+for i in range(mean_values_0.shape[1]):
+    ax.bar(
+        x_ticks + i * bar_width, 
+        mean_values_0[:, i], 
+        bar_width, 
+        yerr=std_values_0[:, i], 
+        label=methods[i], 
+        color=colors[i]
+    )
+# Set the xticks and labels
+ax.set_xticks(indices)
+ax.set_xticklabels([f'{i+1}%' for i in indices])
+ax.set_title(pps[0])
+
+# Add labels and title
+ax.set_xlabel('False Discovery Rate (FDR)')
+ax.set_ylabel('F-score')
+
+# Add a legend
+ax.legend(ncol=4, loc='lower center')
+
+# Save the figure
+plt.savefig(f'plots/{pps[0]}_ep_fscore.png', dpi=300)

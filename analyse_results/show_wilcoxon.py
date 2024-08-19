@@ -7,6 +7,7 @@ import seaborn as sns
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from statsmodels.stats.multitest import multipletests
 import sys
+import os
 
 metric = sys.argv[1] if len(sys.argv) > 1 else "Recall"
 
@@ -16,40 +17,67 @@ if metric == "Recall":
 elif metric == "Precision":
     df = pd.read_csv("../results/pre-calc/sig_test_precision.csv")
 elif metric == "F-score":
+    metric = "Fscore"
     df = pd.read_csv("../results/pre-calc/sig_test_f-score.csv")
+
 else:
     print("Metric not supported")
     exit()
-for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
+#for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
+for alpha in [0.05]:
     #alpha = float(sys.argv[2]) if len(sys.argv) > 2 else 0.02
-    metric = "AU-PRC"
-    df = pd.read_csv(f"../results/pre-calc/{metric}_{alpha}.csv")
+    #df = pd.read_csv(f"../results/pre-calc/{metric}_{alpha}.csv")
+    if os.path.exists(f"../results/plots/all_{alpha}.npy"):
+        data = np.load(f"../results/plots/all_{alpha}.npy", allow_pickle=True).item()  
+    else:
+        print("problems exiting")
+        exit()
 
-    sig_test = df.to_numpy()[:, 1:]
-    sig_test = sig_test
     # get :3 and 6: for EEI
     #sig_test = np.concatenate((sig_test[:3], sig_test[6:]))
-    methods = ["dMaSIF", "PInet", "GLINTER"]
-    methods = ["PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER"]
-    methods_EEI = ["PPMax dMaSIF", "PPMax PInet", "PPMax GLINTER",\
-                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER"]
-    methods_EEI = ["RRI dMaSIF", "RRI PInet", "RRI GLINTER",\
-                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER"]
-    methodsALL = ["RRI dMaSIF", "RRI PInet", "RRI GLINTER",\
-                    "PPMax dMaSIF", "PPMax PInet", "PPMax GLINTER",\
-                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER"]
+    methods = ["dMaSIF", "PInet", "GLINTER", "ProteinMAE"]
+    #methods = ["PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER", "PPDL ProteinMAE"]
+    methods_EEI = ["PPMax dMaSIF", "PPMax PInet", "PPMax GLINTER", "PPMax ProteinMAE",\
+                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER", "PPDL ProteinMAE"]
+    methods_EEI = ["RRI dMaSIF", "RRI PInet", "RRI GLINTER","RRI ProteinMAE",\
+                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER", "PPDL ProteinMAE"]
+    methodsALL = ["RRI dMaSIF", "RRI PInet", "RRI GLINTER","RRI ProteinMAE",\
+                    "PPMax dMaSIF", "PPMax PInet", "PPMax GLINTER","PPMax ProteinMAE",\
+                    "PPDL dMaSIF", "PPDL PInet", "PPDL GLINTER", "PPDL ProteinMAE"]
 
-    len_comp = sig_test.shape[0]
+    # get metric
+    data = {key: value for key, value in data.items() if metric in key}
+    data_wil = dict()
+    # in data, merge the values of the same method and pp but different datasets
+    for method in methods:
+        for dataset in ["CONTACT", "PISA", "EPPIC"]:
+            for pp in ["AA", "Max", "DL"]:
+                key = f"{method} {dataset} - {pp} - {metric}"
+                if key in data:
+                    values = data[key]
+                    if pp == "AA":
+                        new_key = f"RRI {method} - {metric}"
+                    if pp == "Max":
+                        new_key = f"PPMax {method} - {metric}"
+                    if pp == "DL":
+                        new_key = f"PPDL {method} - {metric}"
+                    if new_key not in data_wil:
+                        data_wil[new_key] = values
+                    else:
+                        data_wil[new_key] = np.concatenate((data_wil[new_key], values))
+
+    len_comp = len(methodsALL)
     conf_matrix = np.ones((len_comp, len_comp))
     conf_p = np.ones((len_comp, len_comp))
-    print(sig_test)
-    for i in range(len_comp):
-        for j in range(len_comp):
+    for i, m1 in enumerate(methodsALL):
+        for j, m2 in enumerate(methodsALL):
             if i == j:
                 conf_matrix[i, j] = 1
                 continue
-            values1 = sig_test[i]
-            values2 = sig_test[j]
+            k1 = f"{m1} - {metric}"
+            k2 = f"{m2} - {metric}"
+            values1 = data_wil[k1]
+            values2 = data_wil[k2]
 
             # Perform Wilcoxon test
             statistic, p_value = wilcoxon(values1, values2)
@@ -57,8 +85,8 @@ for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
             # Determine which method has a higher median
             median_diff = np.mean(values1) - np.mean(values2)
             if median_diff > 0:
-                conf_matrix[i,j] = p_value
-                conf_p[i,j] = p_value
+                conf_matrix[i,j] = p_value[0]
+                conf_p[i,j] = p_value[0]
 
             else:
                 conf_matrix[i,j] = 1
@@ -68,10 +96,8 @@ for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
     #print(conf_matrix)
     conf_matrix = q_value.reshape((len_comp, len_comp))
 
-    if len_comp == 6:
-        methods = methods_EEI
-    elif len_comp == 9:
-        methods = methodsALL
+
+    methods = methodsALL
     data = pd.DataFrame(
         conf_matrix,
         index=methods,
@@ -106,7 +132,8 @@ for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
     y_lab = plt.ylabel("PPIIP method")
     plt.tight_layout()
     #plt.title("Wilcoxon Signed-Rank Test p-values")
-    plt.savefig(f"../results/plots/wilcoxon/{metric}_wil_{alpha}.png", bbox_extra_artists=(y_lab,), bbox_inches='tight', dpi=600)
+    if alpha == 0.05:
+        plt.savefig(f"../results/plots/wilcoxon/{metric}_wil4_{alpha}.png", bbox_extra_artists=(y_lab,), bbox_inches='tight', dpi=600)
 
     #write data to file
-    data.to_csv(f"../results/plots/wilcoxon/{metric}_wil_{alpha}.csv")
+        data.to_csv(f"../results/plots/wilcoxon/{metric}_wil4_{alpha}.csv")
