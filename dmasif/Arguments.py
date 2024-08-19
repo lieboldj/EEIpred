@@ -175,3 +175,10 @@ parser.add_argument(
     default="1",
     help="number of training set to use",
 )
+parser.add_argument(
+    "--ppPMAE",
+    type=bool,
+    default=False,
+    help="True if we want to only run the pre-prosessing of the point clouds \
+        for ProteinMAE, default: False",
+)

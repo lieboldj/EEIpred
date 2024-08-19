@@ -20,7 +20,7 @@ parser.add_argument(
     "-c", "--cuda", type=str, help="number of GPU", required=False, default="0"
 )
 parser.add_argument(
-    "-mth", "--method", type=str, help="RRI method (dMaSIF,PInet,glinter)", required=True
+    "-mth", "--method", type=str, help="RRI method (dMaSIF,PInet,glinter,ProteinMAE)", required=True
 )
 parser.add_argument(
     "-d", "--dataset", type=str, help="dataset (CONTACT,EPPIC,PISA)", required=True
@@ -115,11 +115,20 @@ class BinaryMatrixClassifier(nn.Module):
         return x
 
 #%%
+# path to exons
+if optn.method == "ProteinMAE":
+    root_path = "../ProteinMAE/search"
+else:
+    root_path = optn.method
 save_path = "ppDL_models/{}/{}/".format(optn.method, optn.dataset)
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
-exon_labels = "data_collection/cv_splits/{}/{}_positives.txt".format(optn.dataset, optn.dataset)
+if len(optn.dataset.split("_")) > 1:
+    dataset = optn.dataset.split("_")[1]
+else:
+    dataset = optn.dataset
+exon_labels = "data_collection/cv_splits/{}/{}_positives.txt".format(dataset, dataset)
 
 if optn.mode == "train":
     save_path = save_path + "fold"
@@ -128,7 +137,8 @@ if optn.mode == "train":
         cv_idx = int(i)
 
         # load all files from one folder with glob
-        train_folder = "{}/results/{}/fold{}/{}/".format(optn.method, optn.dataset, cv_idx,optn.mode)
+        train_folder = "{}/results/{}/fold{}/{}/".format(root_path, optn.dataset, cv_idx,optn.mode)
+        print(train_folder)
         train_data = glob.glob(train_folder + "*.npy")
         train_data = [x for x in train_data if "big.npy" not in x]
 
@@ -216,7 +226,7 @@ if optn.mode == "test":
             print("Model for fold {} not found!\nPath given: {}".format(cv_idx, model_path))
             exit()
         # load all files from one folder with glob
-        test_folder = "{}/results/{}/fold{}/{}/".format(optn.method, optn.dataset, cv_idx,optn.eval_modus.split("_")[0])
+        test_folder = "{}/results/{}/fold{}/{}/".format(root_path, optn.dataset, cv_idx,optn.eval_modus.split("_")[0])
         test_data = glob.glob(test_folder + "*.npy")
 
         test_data = [x for x in test_data if "big.npy" not in x]
@@ -260,34 +270,41 @@ if optn.mode == "test":
                 print(i[0], i[1], i[2])
         # write results_per_fold to file
         # for readable format
-        if optn.method == "dmasif":
-            if not os.path.exists("results/dMaSIF_DL/"):
-                os.makedirs("results/dMaSIF_DL/")
-            with open("results/dMaSIF_DL/{}_fold{}_results.csv".format(optn.dataset, cv_idx), "w") as f:
-                writer = csv.writer(f)
-                writer.writerow(["pair", "prediction", "label"])
-                writer.writerows(results_per_fold)
-        elif optn.method == "glinter":
-            if not os.path.exists("results/GLINTER_DL/"):
-                os.makedirs("results/GLINTER_DL/")
-            with open("results/GLINTER_DL/{}_fold{}_results.csv".format(optn.dataset, cv_idx), "w") as f:
-                writer = csv.writer(f)
-                writer.writerow(["pair", "prediction", "label"])
-                writer.writerows(results_per_fold)
-        else:
-            if not os.path.exists("results/{}_DL/".format(optn.method)):
-                os.makedirs("results/{}_DL/".format(optn.method))
-            with open("results/{}_DL/{}_fold{}_results.csv".format(optn.method, optn.dataset, cv_idx), "w") as f:
-                writer = csv.writer(f)
-                writer.writerow(["pair", "prediction", "label"])
-                writer.writerows(results_per_fold)
+        #if optn.method == "dmasif":
+        #    if not os.path.exists("results/dMaSIF_DL/"):
+        #        os.makedirs("results/dMaSIF_DL/")
+        #    with open("results/dMaSIF_DL/{}_fold{}_results.csv".format(optn.dataset, cv_idx), "w") as f:
+        #        writer = csv.writer(f)
+        #        writer.writerow(["pair", "prediction", "label"])
+        #        writer.writerows(results_per_fold)
+        #elif optn.method == "glinter":
+        #    if not os.path.exists("results/GLINTER_DL/"):
+        #        os.makedirs("results/GLINTER_DL/")
+        #    with open("results/GLINTER_DL/{}_fold{}_results.csv".format(optn.dataset, cv_idx), "w") as f:
+        #        writer = csv.writer(f)
+        #        writer.writerow(["pair", "prediction", "label"])
+        #        writer.writerows(results_per_fold)
+        #elif optn.method == "ProteinMAE":
+        #    if not os.path.exists("results/ProteinMAE_DL/"):
+        #        os.makedirs("results/ProteinMAE_DL/")
+        #    with open("results/ProteinMAE_DL/{}_fold{}_results.csv".format(optn.dataset, cv_idx), "w") as f:
+        #        writer = csv.writer(f)
+        #        writer.writerow(["pair", "prediction", "label"])
+        #        writer.writerows(results_per_fold)
+        #else:
+        #    if not os.path.exists("results/{}_DL/".format(optn.method)):
+        #        os.makedirs("results/{}_DL/".format(optn.method))
+        #    with open("results/{}_DL/{}_fold{}_results.csv".format(optn.method, optn.dataset, cv_idx), "w") as f:
+        #        writer = csv.writer(f)
+        #        writer.writerow(["pair", "prediction", "label"])
+        #        writer.writerows(results_per_fold)
 
         # uncomment to result files for creating plots
-        #if optn.eval_modus == "test_set":
-        #    np.save("results/{}_DL/{}_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-        #    np.save("results/{}_DL/{}_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
-        #elif optn.eval_modus == "train_set":
-        #    np.save("results/{}_DL/{}_backPOS_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-        #    np.save("results/{}_DL/{}_back_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        if optn.eval_modus == "test_set":
+            np.save("results/{}_DL/{}_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+            np.save("results/{}_DL/{}_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        elif optn.eval_modus == "train_set":
+            np.save("results/{}_DL/{}_backPOS_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+            np.save("results/{}_DL/{}_back_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
 
 # %%

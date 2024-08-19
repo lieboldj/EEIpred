@@ -11,6 +11,8 @@ import os
 from data import ProteinPairsSurfaces, PairData, CenterPairAtoms, load_protein_pair
 from data import RandomRotationPairAtoms, NormalizeChemFeatures, iface_valid_filter
 from model import dMaSIF
+# add an option to save the pre-processed point clouds on hard drive to run ProteinMAE
+from data_iteration_protmae import iterate_protmae
 from data_iteration_exon import iterate
 from helper import *
 from Arguments import parser
@@ -91,20 +93,36 @@ if not os.path.exists(f"results/{dataset_name}/fold{args.train_no}/{mode}/"):
     os.makedirs(f"results/{dataset_name}/fold{args.train_no}/{mode}/")
 
 # Perform one pass through the data:
-info = iterate(
-    net,
-    test_loader,
-    None,
-    args,
-    test=True,
-    save_path=save_predictions_path,
-    pdb_ids=test_pdb_ids,
-    test_info=testing_protein_names,
-    exon_dir=exon_dir,
-    pdb_dir=pdb_dir,
-    dataset_name=args.experiment_name.split("/")[0],
-    mode=mode,
-)
+if not args.ppPMAE:
+    info = iterate(
+        net,
+        test_loader,
+        None,
+        args,
+        test=True,
+        save_path=save_predictions_path,
+        pdb_ids=test_pdb_ids,
+        test_info=testing_protein_names,
+        exon_dir=exon_dir,
+        pdb_dir=pdb_dir,
+        dataset_name=args.experiment_name.split("/")[0],
+        mode=mode,
+    )
+else:
+    info = iterate_protmae(
+        net,
+        test_loader,
+        None,
+        args,
+        test=True,
+        save_path=save_predictions_path,
+        pdb_ids=test_pdb_ids,
+        test_info=testing_protein_names,
+        exon_dir=exon_dir,
+        pdb_dir=pdb_dir,
+        dataset_name=args.experiment_name.split("/")[0],
+        mode=mode,
+    )
 
 # remove the processed files to process different datasets
 shutil.rmtree(Path("surface_data" + str(args.train_no) + "/processed"))
