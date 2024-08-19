@@ -93,7 +93,8 @@ glinter/scripts/run_folds*
 .idea/
 
 glinter/logs/
-glinter/models/*
+glinter/models
+!glinter/glinter
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -121,7 +122,7 @@ dmasif/results/
 
 # C extensions
 *.so
-
+*.npz
 # macOS dir files
 .DS_Store
 
@@ -170,6 +171,9 @@ data_collection/GT*
 data_collection/*.py
 data_collection/uniprot_EnsemblExonPDB_map_*
 data_collection/uniprot_EnsemblExonPDB_map/*
+data_collection/uniprot_EnsemblExonPDB_map.tar.gz
+data_collection/seq_sim_scripts
+data_collection/processed_dmasif
 !data_collection/uniprot_EnsemblExonPDB_map/P10321_1efx_A.txt
 !data_collection/uniprot_EnsemblExonPDB_map/P52292_1efx_C.txt
 data_collection/cv_splits/*
@@ -179,3 +183,6 @@ data_collection/cv_splits/*
 !dmasif/models/EXAMPLE/*
 
 !./requirements.txt
+
+archive
+plots
