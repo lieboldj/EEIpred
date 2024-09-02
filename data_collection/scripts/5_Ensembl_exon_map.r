@@ -33,6 +33,9 @@ ensemble_cds_dir <- paste0(data_dir,ensemble_cds_dir)
 ensembl_out <- "uniprot_pdb_Ensembl_final.txt"
 ensembl_out <- paste0(data_dir, ensembl_out)
 
+priassm <- 'Homo_sapiens.GRCh38.dna.primary_assembly.fa'
+genome <- seqinr::read.fasta(priassm)
+
 # map exons to uniprot sequences #####
 store_dir <- paste0(data_dir, 'uniprot_Ensembl_Exon_map')
 if(dir.exists(store_dir)){
@@ -167,8 +170,14 @@ alld <- getBM(attributes=attrs, filters='uniprotswissprot', values=uniprotids, m
 
 bh_transcripts1 <- rep('',length(uniprotids1))
 
-countl <- c()
+# countl <- c()
+countl <- rep(0, length(uniprotids1))
+count_gap <- rep(0, length(uniprotids1))
+iden <- rep(0,length(uniprotids1))
+
 for(k in 1:length(uniprotids1)){
+	## 3601 --> global alignment giving some error
+	# if(k == 3601){next}
 
 	# length of the uniprot seq
 	uni_seq <- getLength(uniprot_seqs[uniprotids1[k]])
@@ -178,33 +187,77 @@ for(k in 1:length(uniprotids1)){
 	alldata1 <- alldata[alldata$transcript_biotype == 'protein_coding', ]
 	all_transcripts <- alldata1$ensembl_transcript_id
 
-	flags <- 0
+	if(!identical(all_transcripts, character(0))){
+		temp_seq <- biomaRt::getSequence(id=all_transcripts, type='ensembl_transcript_id', seqType='peptide', mart=ensembl)
 
-	for(j in 1:length(all_transcripts)){
+		for(j in 1:length(all_transcripts)){
 
-		temp_cds <- cds_f[cds_f$transcript_id == all_transcripts[j], ]
-		temp_sum <- sum(temp_cds$nt_len)/3
+			temp_cds <- cds_f[cds_f$transcript_id == all_transcripts[j], ]
+			
+			if(nrow(temp_cds) > 0){
+				dna_strand <- temp_cds$V7[[1]][1]
+				temp_sum <- sum(temp_cds$nt_len)/3
+				flags <- 0
+				if(temp_sum == uni_seq){
+					flags <- flags+1
+					
+					## global alignment
+					toalign1 <- temp_seq$peptide[which(temp_seq$ensembl_transcript_id == all_transcripts[j])] ## protein seqeunce of first transcript
+					toalign1 <- cleanSeq(toalign1)
 
-		if(temp_sum == uni_seq){
-			flags <- flags+1
-			bh_transcripts1[k] <- all_transcripts[j]
-			break
+					# temps <- seqinr::getSequence(genome[paste0('chr',temp_cds[[1]][1])])[[1]]
+					temps <- seqinr::getSequence(genome[temp_cds[[1]][1]])[[1]]
+
+					allseq <- c()
+					for(i in 1:length(temp_cds[[1]])){
+						start <- temp_cds$V4[i]
+						end <- temp_cds$V5[i]
+						tempseq <- temps[start:end]
+						if(dna_strand == "-"){
+							tempseq <- rev(seqinr::comp(tempseq))
+						}
+						allseq <- c(allseq, tempseq)
+					}
+					
+					toalign2 <- toupper(paste(seqinr::translate(allseq),collapse=''))
+
+					xxx <- Biostrings::pairwiseAlignment(toalign1, toalign2,
+			                     substitutionMatrix = "BLOSUM62", 
+			                     gapOpening = -2,
+			                     gapExtension = -8, 
+			                     scoreOnly = FALSE)
+
+					iso1 <- as.vector(stringr::str_split_fixed(as.character(Biostrings::pattern(xxx)), pattern='', n=nchar(as.character(Biostrings::pattern(xxx)))))
+					iso2 <- as.vector(stringr::str_split_fixed(as.character(Biostrings::subject(xxx)), pattern='', n=nchar(as.character(Biostrings::subject(xxx)))))
+
+					gap1 <- length(which(iso1 == '-')) # number of gaps in isoform1
+					gap2 <- length(which(iso2 == '-')) # number of gaps in isoform 2
+					gap <- gap1+gap2
+					count_gap[k] <- gap
+					iden[k] <- 100-Biostrings::pid(xxx, type='PID3')
+					if(iden[k] == 0 && gap == 0){
+						bh_transcripts1[k] <- all_transcripts[j]
+						break
+					}
+				}
+			}
 		}
-
+		countl[k] <- flags
 	}
-
-	countl <- c(countl, flags)
 	cat('Protein',k,' of ', length(uniprotids1), ' done\n')
-
 }
 
-countlk <- plyr::count(countl)
+countl1 <- count_gap
+idenl1 <- iden
 
 bh_transcripts2 <- rep('',length(uniprotids2))
-countm <- c()
+countl <- c()
+count_gap <- rep(0, length(uniprotids2))
+iden <- rep(0,length(uniprotids2))
 
 for(k in 1:length(uniprotids2)){
 
+	# if(k == 2415 | k == 3841 | k==4108){next}
 	# length of the uniprot seq
 	uni_seq <- getLength(uniprot_seqs[uniprotids2[k]])
 	alldata <- alld[alld$uniprotswissprot == uniprotids2[k], ]
@@ -212,43 +265,79 @@ for(k in 1:length(uniprotids2)){
 	# only protein coding
 	alldata1 <- alldata[alldata$transcript_biotype == 'protein_coding', ]
 	all_transcripts <- alldata1$ensembl_transcript_id
-	flags <- 0
 
-	for(j in 1:length(all_transcripts)){
+	if(!identical(all_transcripts, character(0))){
+		temp_seq <- biomaRt::getSequence(id=all_transcripts, type='ensembl_transcript_id', seqType='peptide', mart=ensembl)
 
-		temp_cds <- cds_f[cds_f$transcript_id == all_transcripts[j], ]
-		temp_sum <- sum(temp_cds$nt_len)/3
+		for(j in 1:length(all_transcripts)){
 
-		if(temp_sum == uni_seq){
-			flags <- flags+1
+			temp_cds <- cds_f[cds_f$transcript_id == all_transcripts[j], ]
+			
+			if(nrow(temp_cds) > 0){
+				dna_strand <- temp_cds$V7[[1]][1]
+				temp_sum <- sum(temp_cds$nt_len)/3
+				flags <- 0
+				if(temp_sum == uni_seq){
+					flags <- flags+1
 
-			bh_transcripts2[k] <- all_transcripts[j]
-			break
+					## global alignment
+					toalign1 <- temp_seq$peptide[which(temp_seq$ensembl_transcript_id == all_transcripts[j])] ## protein seqeunce of first transcript
+					toalign1 <- cleanSeq(toalign1)
+
+					# temps <- seqinr::getSequence(genome[paste0('chr',temp_cds[[1]][1])])[[1]]
+					temps <- seqinr::getSequence(genome[temp_cds[[1]][1]])[[1]]
+
+					allseq <- c()
+					for(i in 1:length(temp_cds[[1]])){
+						start <- temp_cds$V4[i]
+						end <- temp_cds$V5[i]
+						tempseq <- temps[start:end]
+						if(dna_strand == "-"){
+							tempseq <- rev(seqinr::comp(tempseq))
+						}
+						allseq <- c(allseq, tempseq)
+					}
+					
+					toalign2 <- toupper(paste(seqinr::translate(allseq),collapse=''))
+
+					xxx <- Biostrings::pairwiseAlignment(toalign1, toalign2,
+			                     substitutionMatrix = "BLOSUM62", 
+			                     gapOpening = -2,
+			                     gapExtension = -8, 
+			                     scoreOnly = FALSE)
+
+					iso1 <- as.vector(stringr::str_split_fixed(as.character(Biostrings::pattern(xxx)), pattern='', n=nchar(as.character(Biostrings::pattern(xxx)))))
+					iso2 <- as.vector(stringr::str_split_fixed(as.character(Biostrings::subject(xxx)), pattern='', n=nchar(as.character(Biostrings::subject(xxx)))))
+
+					gap1 <- length(which(iso1 == '-')) # number of gaps in isoform1
+					gap2 <- length(which(iso2 == '-')) # number of gaps in isoform 2
+					gap <- gap1+gap2
+					count_gap[k] <- gap
+					iden[k] <- 100-Biostrings::pid(xxx, type='PID3')
+					if(iden[k] == 0 && gap == 0){
+						bh_transcripts2[k] <- all_transcripts[j]
+						break
+					}
+				}
+			}
 		}
-
+		countl[k] <- flags
 	}
-	countm <- c(countm, flags)
-
 	cat('Protein',k,' of ', length(uniprotids2), ' done\n')
-
 }
 
 
 uniprot_pdb$bh_ensembl_transcript_id1 <- bh_transcripts1
 uniprot_pdb$bh_ensembl_transcript_id2 <- bh_transcripts2
 
-# consider only those uniprot ids that have a BH transcript match
-# Here, the BH transcript match is defined as the exact seqeunce length match of uniprot id to a transcript id
-# 13,240 pairs out of 13,818 pairs remain 
-
 uniprot_pdb_final1 <- uniprot_pdb[uniprot_pdb$bh_ensembl_transcript_id1 != '', ]
 uniprot_pdb_final2 <- uniprot_pdb_final1[uniprot_pdb_final1$bh_ensembl_transcript_id2 != '', ]
 
-fwrite(uniprot_pdb_final2, ensembl_out, sep='\t', quote=FALSE, row.names=FALSE)
-uniprot_pdb_final <- data.table::fread(ensembl_out, header=TRUE)
+fwrite(uniprot_pdb_final2, '../data/uniprot_pdb_Ensembl_final.txt', sep='\t', quote=FALSE, row.names=FALSE)
+uniprot_pdb_final <- data.table::fread('../data/uniprot_pdb_Ensembl_final.txt', header=TRUE)
 
 
-### do the exon mapping to uniprot sequences
+### do the exon mapping to uniprot sequences ----------------------------------------
 uniprot_uni_ids1 <- uniprot_pdb_final$PROTEIN1
 transcript_uni_ids1 <- uniprot_pdb_final$bh_ensembl_transcript_id1
 chain_ids1 <- uniprot_pdb_final$CHAIN1
@@ -257,8 +346,6 @@ pdb_ids <- tolower(uniprot_pdb_final$ID)
 uniprot_uni_ids2 <- uniprot_pdb_final$PROTEIN2
 transcript_uni_ids2 <- uniprot_pdb_final$bh_ensembl_transcript_id2
 chain_ids2 <- uniprot_pdb_final$CHAIN2
-
-
 
 # for one of the interacting protein
 for(k in 1:length(transcript_uni_ids1)){
