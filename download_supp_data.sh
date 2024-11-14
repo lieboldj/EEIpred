@@ -4,7 +4,7 @@
 url_data="https://figshare.com/ndownloader/files/45074818"
 url_pretrained="https://figshare.com/ndownloader/files/45074824"
 
-# Directory where you want to save the downloaded zip file
+# Directory to download the zip file into best here, same download_sup_data.sh
 download_dir="."
 
 # Download the zip file into the download directory
@@ -43,12 +43,17 @@ mv "$download_dir/pre-trained_models/PInet/CONTACT" "$download_dir/ppDL_models/P
 mv "$download_dir/pre-trained_models/PInet/EPPIC" "$download_dir/ppDL_models/PInet/"
 mv "$download_dir/pre-trained_models/PInet/PISA" "$download_dir/ppDL_models/PInet/"
 
+mv "$download_dir/pre-trained_models/ProteinMAE/CONTACT" "$download_dir/ppDL_models/ProteinMAE/"
+mv "$download_dir/pre-trained_models/ProteinMAE/EPPIC" "$download_dir/ppDL_models/ProteinMAE/"
+mv "$download_dir/pre-trained_models/ProteinMAE/PISA" "$download_dir/ppDL_models/ProteinMAE/"
+
 for i in {1..5}
 do
   mv "$download_dir/pre-trained_models/glinter/CONTACT/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
   mv "$download_dir/pre-trained_models/glinter/EPPIC/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
   mv "$download_dir/pre-trained_models/glinter/PISA/fold"$i".pth" "$download_dir/ppDL_models/glinter/"
 done
+
 # move the pre-trained models to the correct directory for the 3 baseline methods
 for i in {1..5}
 do
@@ -71,6 +76,8 @@ do
   mv "$download_dir/pre-trained_models/glinter/EPPIC/model_"$j"_best.pt" "$download_dir/glinter/ckpts/EPPIC/train$j/"
   mv "$download_dir/pre-trained_models/glinter/PISA/model_"$j"_best.pt" "$download_dir/glinter/ckpts/PISA/train$j/"
 done
+
+mv "$download_dir/pre-trained_models/ProteinMAE/Transformer_search_batch32_pre_*" "$download_dir/ProteinMAE/search/models/"
 
 # remove the pre-trained models folder and datasets folder
 rm -r "$download_dir/pre-trained_models"
