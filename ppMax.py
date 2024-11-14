@@ -24,7 +24,6 @@ if __name__ == "__main__":
         non_inter_exons = []
         all_exons = glob.glob("{}/results/{}/fold{}/{}/*".format(method_path, dataset,i,mode))
         all_exons = sorted(all_exons)
-        print("Number of exons: ", len(all_exons))
 
         for exon_pair_full in tqdm(all_exons):
             exon_pair = exon_pair_full.split("/")[-1].split("_")
