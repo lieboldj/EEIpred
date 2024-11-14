@@ -1,6 +1,6 @@
 #!/bin/bash
-python utils/train_richdbd2_fixed6mmgk.py --dataset ../data/exon --fold 0 --dataset_name _CONTACT --cuda 1
-python utils/train_richdbd2_fixed6mmgk.py --dataset ../data/exon --fold 1 --dataset_name _CONTACT --cuda 1
+python utils/train_richdbd2_fixed6mmgk.py --dataset ../data/exon --fold 0 --dataset_name _CLUST_CONTACT --cuda 1
+python utils/train_richdbd2_fixed6mmgk.py --dataset ../data/exon --fold 1 --dataset_name _CLUST_CONTACT --cuda 1
 
 
 #python utils/train_richdbd2_fixed6mmgk.py --dataset ../data/exon --fold 0 --dataset_name _PISA --cuda 1
