@@ -89,6 +89,9 @@ glinter/scripts/get_back*
 glinter/scripts/new_AlexNet-*
 glinter/scripts/run_folds*
 
+glinter/.gitignore
+glinter/.pylintrc
+
 # JetBrains PyCharm IDE
 .idea/
 
@@ -118,7 +121,7 @@ dmasif/data_analysis/roc_curves
 dmasif/data_analysis/.ipynb_checkpoints/
 dmasif/.ipynb_checkpoints/
 dmasif/results/
-
+dmasif/run_clust*
 
 # C extensions
 *.so
@@ -152,6 +155,7 @@ results/
 ppDL_models/*
 !ppDL_models/dmasif
 ppDL_models/dmasif/CONTACT
+ppDL_models/dmasif/CLUST_CONTACT
 ppDL_models/dmasif/PISA
 ppDL_models/dmasif/EPPIC
 run_experiments/run_results_random.sh
@@ -186,3 +190,18 @@ data_collection/cv_splits/*
 
 archive
 plots
+
+Protein_MAE/.gitignore*
+CDPred
+Student_data
+test_student
+StrIDR_database.json
+load_json.py
+get_RRI_*
+get_roc.py
+RRI_results_8.py
+collect
+analyse_results/*.png
+RRI_results_CLUST*
+get_RRI.sh
+analyse_results/intermed_store
