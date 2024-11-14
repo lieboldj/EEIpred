@@ -70,9 +70,9 @@ for e, metric_string in enumerate(metrics):
         print(alphas)
 
         for key in data.keys():
-            if "DL" in key:
+            if pps[1] in key:
                 data_DLs[key] = data[key]
-            else:
+            elif pps[0] in key:
                 data_Max[key] = data[key]
         # create scatter plot for each combination of DL and DLs pp
         # the x axis is DLs and the y axis is DL
@@ -87,16 +87,17 @@ for e, metric_string in enumerate(metrics):
         if metric_string == "AUPRC" or metric_string == "AUROC":
             metric_check = False
 plt.plot([0,1],[0,1], color='gray', linestyle='--', linewidth=0.5)
-plt.xlim(0,1)
-plt.ylim(0,1)
+plt.xlim(0,0.8)
+plt.ylim(0,0.8)
 fontsize = 16
 if pps[0] == "AA":
-    plt.title("RRI vs PPDL", fontsize=fontsize)
+    #plt.title("RRI vs PPDL", fontsize=fontsize)
     plt.xlabel("RRI prediction performance", fontsize=fontsize, labelpad=15)
 else:
     plt.xlabel("EEI prediction performance (using PPMax)", fontsize=fontsize, labelpad=15)
-    plt.title("PPMax vs PPMaxDL", fontsize=fontsize)
+    #plt.title("PPMax vs PPMaxDL", fontsize=fontsize)
 plt.ylabel("EEI prediction performance (using PPDL)", fontsize=fontsize, labelpad=15)
+#plt.ylabel("RRI prediction performance - 8A", fontsize=fontsize, labelpad=15)
 
 #leg = plt.legend(ncol=3, loc='upper left', bbox_to_anchor=(1.15, 1.15))
 #place legend outside of plot
@@ -123,8 +124,8 @@ labels = ["$\mathbf{PPIIP}$\n$\mathbf{method}$"] + methods + ["$\mathbf{Dataset}
 plt.xticks(fontsize=fontsize)
 plt.yticks(fontsize=fontsize)
 
-leg = plt.legend(legend_elements, labels, loc='lower left', fontsize=fontsize-3, bbox_to_anchor=(1.02, 0.05))
-plt.savefig(f"plots/{pps[0]}aVSDL_240806.png", dpi=600, \
+leg = plt.legend(legend_elements, labels, loc='lower left', fontsize=fontsize-3, bbox_to_anchor=(1.02, -0.03))
+plt.savefig(f"plots/{pps[0]}_{pps[1]}_08.png", dpi=600, \
                 bbox_extra_artists=(leg,), bbox_inches='tight')
 #if sampling_on:
 #    plt.savefig(f"results/plots/DLsVSDL_all_sampling_{alphas[0]}.png", dpi=300)

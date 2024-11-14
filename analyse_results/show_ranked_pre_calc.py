@@ -49,8 +49,10 @@ datasets = args.dataset.split(",")
 sampling_on = args.sampling
 auroc_on = args.auroc
 evals = ["Precision", "Recall", "Fscore", "MCC"]
+pick_dataset = "EPPIC"
+get_index_dataset = datasets.index(pick_dataset)
 
-
+font_size = 16
 thresholds = [i / 100 for i in range(1, 6)]
 #ranked_results = np.zeros((len(thresholds), 9, 3))
 roc_aucs = np.zeros((len(thresholds), 9))
@@ -115,32 +117,56 @@ for i in range(num_bars):
     for bar, value in zip(bars, counts[:, i]):
         if value > 3:
             height = bar.get_height()
-            ax.text(
-                bar.get_x() + bar.get_width() / 2, 
-                bar.get_y() + height / 2, 
-                f'{value}', 
-                ha='center', 
-                va='center', 
-                color='white'
-            )
+            if value == 24:
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2, 
+                    bar.get_y() + height / 2 + 2, 
+                    f'{value}', 
+                    ha='center', 
+                    va='center', 
+                    color='white', 
+                    fontsize=font_size
+                )
+            elif value == 22:
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2, 
+                    bar.get_y() + height / 2 + 4, 
+                    f'{value}', 
+                    ha='center', 
+                    va='center', 
+                    color='white', 
+                    fontsize=font_size
+                )
+            else:
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2, 
+                    bar.get_y() + height / 2, 
+                    f'{value}', 
+                    ha='center', 
+                    va='center', 
+                    color='white', 
+                    fontsize=font_size
+                )
     bottom += counts[:, i]
 
 # Set the xticks and labels
 ax.set_xticks(indices)
-ax.set_xticklabels([f'{i+1}%' for i in indices])
-ax.set_title(pps[0])
+ax.set_xticklabels([f'{i+1}%' for i in indices], fontsize=font_size)
+#ax.set_title(pps[0])
 # Set the y-axis limit
 ax.set_ylim(0, 60)
+ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 
 # Add labels and title
-ax.set_xlabel('False Discovery Rate (FDR)')
-ax.set_ylabel('Number if performance tests')
+ax.set_xlabel('False Discovery Rate (FDR)', fontsize=font_size)
+ax.set_ylabel('Number of performance tests', fontsize=font_size)
 
 # Add a legend
-ax.legend(ncol=4, loc='lower center')
+#ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.55, 0.1))
 
+plt.tight_layout()
 #Save figure
-plt.savefig(f'plots/{pps[0]}_ranked.png', dpi=300)
+plt.savefig(f'plots/{pps[0]}_ranked_ECCB.png', dpi=600)
 
 
 # create bar plots with error bar for Fscore only but the 5 different thresholds
@@ -148,15 +174,16 @@ plt.savefig(f'plots/{pps[0]}_ranked.png', dpi=300)
 # Step 2: Calculate the mean and standard deviation of the F-scores.
 mean_fscore = np.nanmean(ranked_results, axis=4)
 std_fscore = np.nanstd(ranked_results, axis=4)
-print(mean_fscore.shape)
+
 # Step 3: Plot the results.
 fig, ax = plt.subplots()
 
 # Select the relevant data
 x_ticks = np.arange(mean_fscore.shape[0])  # dim0
-mean_values_0 = mean_fscore[:, :, 2, 2]    # 1 = PISA
-std_values_0 = std_fscore[:, :, 2, 2]      # 1 = PISA
-
+mean_values_0 = mean_fscore[:, :, get_index_dataset, 2]    # second last dim: 1 = PISA, 0 = CONTACT 2 = EPPIC, last dim: 2 = Fscore, 1 = Recall, 0 = Precision, 3 = MCC
+std_values_0 = std_fscore[:, :, get_index_dataset, 2]      # same here
+# 5 thresholds, 4 methods, 3 datasets, 4 metrics, 5 test sets
+#evals = ["Precision", "Recall", "Fscore", "MCC"]
 # Bar Width to fit 5 bars in one group
 bar_width = 0.15
 
@@ -172,15 +199,17 @@ for i in range(mean_values_0.shape[1]):
     )
 # Set the xticks and labels
 ax.set_xticks(indices)
-ax.set_xticklabels([f'{i+1}%' for i in indices])
-ax.set_title(pps[0])
+ax.set_xticklabels([f'{i+1}%' for i in indices], fontsize=font_size)
+#ax.set_title(pps[0])
 
 # Add labels and title
-ax.set_xlabel('False Discovery Rate (FDR)')
-ax.set_ylabel('F-score')
+ax.set_xlabel('False Discovery Rate (FDR)', fontsize=font_size)
+ax.set_ylabel('F-score', fontsize=font_size)
+
+ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 
 # Add a legend
-ax.legend(ncol=4, loc='lower center')
-
+ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.5, -0.02))
+plt.tight_layout()
 # Save the figure
-plt.savefig(f'plots/{pps[0]}_ep_fscore.png', dpi=300)
+plt.savefig(f'plots/{pps[0]}_{pick_dataset}_fscore.png', dpi=300)

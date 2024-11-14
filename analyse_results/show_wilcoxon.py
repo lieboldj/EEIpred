@@ -20,11 +20,9 @@ elif metric == "F-score":
     metric = "Fscore"
     df = pd.read_csv("../results/pre-calc/sig_test_f-score.csv")
 
-else:
-    print("Metric not supported")
-    exit()
-#for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
-for alpha in [0.05]:
+print(metric)
+for alpha in [0.01, 0.02, 0.03, 0.04, 0.05]:
+#for alpha in [0.05]:
     #alpha = float(sys.argv[2]) if len(sys.argv) > 2 else 0.02
     #df = pd.read_csv(f"../results/pre-calc/{metric}_{alpha}.csv")
     if os.path.exists(f"../results/plots/all_{alpha}.npy"):
@@ -85,8 +83,12 @@ for alpha in [0.05]:
             # Determine which method has a higher median
             median_diff = np.mean(values1) - np.mean(values2)
             if median_diff > 0:
-                conf_matrix[i,j] = p_value[0]
-                conf_p[i,j] = p_value[0]
+                if metric != "AUPRC" and metric != "AUROC":
+                    conf_matrix[i,j] = p_value[0]
+                    conf_p[i,j] = p_value[0]
+                else:
+                    conf_matrix[i,j] = p_value
+                    conf_p[i,j] = p_value
 
             else:
                 conf_matrix[i,j] = 1
@@ -135,5 +137,5 @@ for alpha in [0.05]:
     if alpha == 0.05:
         plt.savefig(f"../results/plots/wilcoxon/{metric}_wil4_{alpha}.png", bbox_extra_artists=(y_lab,), bbox_inches='tight', dpi=600)
 
-    #write data to file
-        data.to_csv(f"../results/plots/wilcoxon/{metric}_wil4_{alpha}.csv")
+    #write data to file without header
+    data.to_csv(f"../results/plots/wilcoxon/{metric}_wil4_{alpha}.csv", header=False)   

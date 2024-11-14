@@ -16,10 +16,10 @@ parser.add_argument('-mh', '--method', type=str, default="dMaSIF,PInet,GLINTER,P
 parser.add_argument('-p', '--pp', type=str, default="AA", help='Preprocessings to test')
 parser.add_argument('-d', '--dataset', type=str, default="CONTACT,PISA,EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=int, default=0, help='Sampling on or off, is recommanded for AUROC')
-parser.add_argument('-mr','--metric', type=str, default="MCC", help='Metric to plot, choose between AUPRC, AUROC, Fscore, Precision, Recall, for Precision and Recall you need to provide alpha')
-parser.add_argument('-a','--alpha', type=float, default=0.01, help='Threshold for precision and recall')
+parser.add_argument('-mr','--metric', type=str, default="AUROC", help='Metric to plot, choose between AUPRC, AUROC, Fscore, Precision, Recall, for Precision and Recall you need to provide alpha')
+parser.add_argument('-a','--alpha', type=float, default=0.05, help='Threshold for precision and recall')
 parser.add_argument('-c','--conf_matrix', type=int, default=0, help='Confusion matrix')
-parser.add_argument('-csv','--csv', type=int, default=1, help='Create csv file with all results')
+parser.add_argument('-csv','--csv', type=int, default=0, help='Create csv file with all results')
 
 args = parser.parse_args()
 methods = args.method.split(",")
@@ -105,6 +105,25 @@ def plot_methods(ax, methods, datasets, data_dicts, num_settings, bar_width, fon
             setting_label = ' '.join(setting)
             bar_position = (method_index * (num_settings + 1) + i) * bar_width
             ax.bar(bar_position, value[0], bar_width, yerr=value[1], color=color_map[setting_label], label=f'{setting_label}')
+            if (args.pp == "DL" or args.pp == "Max") and args.metric == "AUPRC":
+                if i % 3 == 0: # CONTACT
+                    hline_height = 0.2209280904
+                elif i % 3 == 1: # PISA
+                    hline_height = 0.3477447084
+                elif i % 3 == 2: # EPPIC
+                    hline_height = 0.3609405375
+                ax.hlines(hline_height, bar_position - bar_width/2, bar_position + bar_width/2, color='gray', linestyle='solid', label='_nolegend_')
+
+            elif args.pp == "AA" and args.metric == "AUPRC":
+                if i % 3 == 0: # CONTACT
+                    hline_height = 0.002656900248
+                elif i % 3 == 1: # PISA
+                    hline_height = 0.002456525148
+                elif i % 3 == 2: # EPPIC
+                    hline_height = 0.002704997385
+            #ax.axvline(bar_position + bar_width, color='black', linewidth=0.5, linestyle='--', ymax=hline_height)
+                ax.hlines(hline_height, bar_position - bar_width/2, bar_position + bar_width/2, color='gray', linestyle='solid', label='_nolegend_')
+           
     
     # Set xticks and labels
     tick_positions = []
@@ -116,8 +135,8 @@ def plot_methods(ax, methods, datasets, data_dicts, num_settings, bar_width, fon
 
 
     # set lim to 0-1
-    if metric_string == "AUROC":
-        ax.set_ylim([0, 1])
+    if metric_string == "AUROC" and args.pp == "DL":
+        ax.set_ylim([0, 0.8])
     else:
         # get the max value of the data
         max_value = 0
@@ -289,7 +308,7 @@ if False:
     #print(data)
 
     # save dict to file to faster load it
-    #np.save(f"../results/plots/all_{alphas[0]}.npy", data)
+    np.save(f"../results/plots/all_{alphas[0]}_{pp}.npy", data)
     exit()
 
 # Extract settings
@@ -386,6 +405,8 @@ for key,values in data.items():
 
 # only keep the keys that have the metric_string in it
 data = {key: value for key, value in data.items() if metric_string in key}
+# keep only the keys that have the pp in it
+data = {key: value for key, value in data.items() if pp + " -" in key}
 settings = list({key: value for key, value in data.items() if 'dMaSIF' in key}.keys())
 num_settings = len(settings)
 
@@ -469,10 +490,19 @@ elif metric_string == "AUPRC":
 else:
     ax.set_ylabel(metric_string, fontsize=font_size, labelpad=15)
 ax.set_xlabel('PPIIP method', fontsize=font_size, labelpad=15)
-# ax.set_title('Values with Error Bars for Different Settings')
+# make sure the yticks are .1f
 
+if args.metric == "AUROC":
+    pass
+    #ax.set_yticklabels([0.0,0.2,0.4,0.6,0.8], fontsize=font_size)
+else: 
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
+ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 # Add legend
 legend_labels = ["$D_{Con}$", "$D_{Engy}$", "$D_{Evol}$"]
-ax.legend(legend_labels, loc='lower center', ncol=3, fontsize=font_size)
-plt.savefig(f"plots/{pp}_{metric_string}.png", dpi=600, bbox_inches='tight')
+if args.metric == "AUPRC":
+    ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
+#else:
+#    ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
+plt.savefig(f"plots/{pp}_{metric_string}_random.png", dpi=600, bbox_inches='tight')
 
