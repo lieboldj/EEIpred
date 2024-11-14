@@ -1,22 +1,10 @@
 import torch
 import numpy as np
 from helper import *
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.autograd.profiler as profiler
-from sklearn.metrics import roc_auc_score
 from scipy.spatial.transform import Rotation
-#from data import RandomRotationPairAtoms, CenterPairAtoms
-from pathlib import Path
-import math
 from tqdm import tqdm
-from helper import numpy, diagonal_ranges
-from scipy.spatial.distance import cdist
 import time
 import os
-
-from Bio.PDB.PDBParser import PDBParser
-from collections import defaultdict
 
 def process_single(protein_pair, chain_idx=1):
     """Turn the PyG data object into a dict."""

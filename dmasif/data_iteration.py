@@ -351,25 +351,25 @@ def iterate(
                 optimizer.step()
                 torch.cuda.synchronize()
                 back_time = time.time() - back_time
-
-            if it == protein_it == 0 and not test:
-                for para_it, parameter in enumerate(net.atomnet.parameters()):
-                    if parameter.requires_grad:
-                        summary_writer.add_histogram(
-                            f"Gradients/Atomnet/para_{para_it}_{parameter.shape}",
-                            parameter.grad.view(-1),
-                            epoch_number,
-                        )
-                for para_it, parameter in enumerate(net.conv.parameters()):
-                    if parameter.requires_grad:
-                        summary_writer.add_histogram(
-                            f"Gradients/Conv/para_{para_it}_{parameter.shape}",
-                            parameter.grad.view(-1),
-                            epoch_number,
-                        )
-
-                for d, features in enumerate(P1["input_features"].T):
-                    summary_writer.add_histogram(f"Input features/{d}", features)
+            if summary_writer is not None:
+                if it == protein_it == 0 and not test:
+                    for para_it, parameter in enumerate(net.atomnet.parameters()):
+                        if parameter.requires_grad:
+                            summary_writer.add_histogram(
+                                f"Gradients/Atomnet/para_{para_it}_{parameter.shape}",
+                                parameter.grad.view(-1),
+                                epoch_number,
+                            )
+                    for para_it, parameter in enumerate(net.conv.parameters()):
+                        if parameter.requires_grad:
+                            summary_writer.add_histogram(
+                                f"Gradients/Conv/para_{para_it}_{parameter.shape}",
+                                parameter.grad.view(-1),
+                                epoch_number,
+                            )
+    
+                    for d, features in enumerate(P1["input_features"].T):
+                        summary_writer.add_histogram(f"Input features/{d}", features)
 
             if save_path is not None:
                 save_protein_batch_single(

@@ -22,7 +22,11 @@ import shutil
 ##############################################################################
 # mode is test, change to train for background model
 ##############################################################################
-mode = "test"
+mode = "train"
+if mode == "test":
+    b_mode = False
+else:
+    b_mode = True
 
 args = parser.parse_args()
 model_path = "models/" + args.experiment_name
@@ -59,7 +63,7 @@ else:
     #change train to true for background model#
     ###############################
     test_dataset = ProteinPairsSurfaces(
-        f"surface_data{args.train_no}", ppi=args.train_no, train=False, transform=None
+        f"surface_data{args.train_no}", ppi=args.train_no, train=b_mode, transform=None
     )
     # change TRAIN TEST HERE
     test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/{mode}ing_pairs_data_ids_ppi.npy")
