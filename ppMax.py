@@ -10,7 +10,8 @@ if __name__ == "__main__":
     mode = sys.argv[2] #"train, test"
     method = sys.argv[3] #"dmasif, PInet, glinter"
     folds = sys.argv[4] #[1,2,3,4,5]" for all folds
-    method_path = "../ProteinMAE/search/"
+    #method_path = "../ProteinMAE/search/"
+    method_path = "dmasif"
     path_to_data = "data_collection/cv_splits/"
 
     filename_pos = path_to_data + "{}/{}_positives.txt".format(dataset.split('_')[1], dataset.split('_')[1])
@@ -23,6 +24,7 @@ if __name__ == "__main__":
         non_inter_exons = []
         all_exons = glob.glob("{}/results/{}/fold{}/{}/*".format(method_path, dataset,i,mode))
         all_exons = sorted(all_exons)
+        print("Number of exons: ", len(all_exons))
 
         for exon_pair_full in tqdm(all_exons):
             exon_pair = exon_pair_full.split("/")[-1].split("_")

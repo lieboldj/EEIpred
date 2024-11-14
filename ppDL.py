@@ -300,6 +300,9 @@ if optn.mode == "test":
         #        writer.writerows(results_per_fold)
 
         # uncomment to result files for creating plots
+        if optn.method == "dmasif":
+            optn.method = "dMaSIF"
+
         if optn.eval_modus == "test_set":
             np.save("results/{}_DL/{}_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
             np.save("results/{}_DL/{}_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
