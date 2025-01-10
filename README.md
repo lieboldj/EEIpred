@@ -2,7 +2,7 @@
 ![Image](Figure2structure.png)
 
 ## Abstract
-Alternative splicing (AS) effects on cellular functions can be captured by changes in the underlying protein-protein interactions (PPIs). Because AS results in the gain or loss of exons, existing methods for predicting AS-related PPI changes utilize known PPI interfacing exon-exon interactions (EEIs), which only cover ~5% of possible human PPIs. Hence, there is a need to extend the existing limited knowledge about EEIs to further advance the functional understanding of AS. In this study, we explore whether we can utilize existing computational PPI interface prediction (PPIIP) methods to predict EEIs instead of their original task of predicting residue-residue interactions (RRIs). We evaluate three recent state-of-the-art PPIIP methods on the RRI as well as the EEI prediction tasks using known protein complex structures, covering ~230,000 RRIs and ~27,000 EEIs. Our results provide the first evidence that existing PPIIP methods can be extended for the EEI prediction task, showing F-score, precision, and recall performances of up to ~38%, ~63%, and ~28%, respectively, with a false discovery rate of less than 5%. Our study provides insights into the power and limits of existing PPIIP methods to predict EEIs, which can guide future developments of computational methods for the EEI prediction task. We provide streamlined computational pipelines to the use of each of the three considered PPIIP methods for the EEI prediction task to be utilized by the scientific community. 
+Alternative splicing (AS) effects on cellular functions can be captured by studying changes in the underlying protein-protein interactions (PPIs). Because AS results in the gain or loss of exons, existing methods for predicting AS-related PPI changes utilize known inter-protein exon-exon interactions (EEIs), which cover less than 0.5% of known human PPIs. Hence, there is a need to extend the existing limited EEI knowledge to advance the functional understanding of AS. Here, we explore whether existing 3-dimensional (3D) protein structure-based computational PPI interface prediction (PPIIP) methods, originally designed to predict inter-protein residue-residue interactions (RRIs), can be utilized to predict EEIs. We evaluate the PPIIP methods for the RRI- as well as EEI-prediction tasks using all known experimentally determined 3D structures of human protein heterodimers from the Protein Data Bank. From these heterodimers we determined ~230,000 RRIs and ~27,000 EEIs as ground truth. We provide the first evidence of the adaptability of existing PPIIP methods to predict EEIs, with a performance score of up to ~72% based on area under the receiver operating characteristic curve. Insights, data, and computational pipelines from our study have the potential to guide future developments of computational methods for solving the task of predicting EEIs.  
 
 ## Hardware requirements
 Models have been trained on either a NVIDIA A40 or a single Tesla T4 GPU.
@@ -14,7 +14,7 @@ Before you begin, ensure that you have the following prerequisites installed on 
 - `python` >=3.11
 
 ## Installation Steps
-Given CUDA version 12.1, the following installation guide was tested.
+Given CUDA version 12.6, the following installation guide was tested.
 
 ### 1. Create conda environment
 ```bash
@@ -32,15 +32,15 @@ conda install -c conda-forge gxx
 conda install -c conda-forge cxx-compiler
 ```
 
-### 3. Install required packages from requirements.txt via pip
-```bash
-cat requirements.txt | xargs -L 1 pip install
-```
-
-### 4. Clone the repository
+### 3. Clone the repository
 ```bash
 git clone https://github.com/lieboldj/EEIpred
 cd eeip/
+```
+
+### 4. Install required packages from requirements.txt via pip
+```bash
+cat requirements.txt | xargs -L 1 pip install
 ```
 
 ## Usage

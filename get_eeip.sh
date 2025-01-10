@@ -23,6 +23,9 @@ python -W ignore -u main_inference_exon.py --experiment_name "$dataset/dMaSIF_se
 # Change directory
 cd ..
 
+# create directory for the npy files if not exists
+mkdir -p results/dMaSIF_DL
+
 # Run PPDL
 python ppDL.py -mth dmasif -d "$dataset" -f "$fold"
 
