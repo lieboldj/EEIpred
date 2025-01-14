@@ -97,6 +97,9 @@ glinter/.pylintrc
 
 glinter/logs/
 glinter/models
+!glinter/glinter/models/__init__.py
+!glinter/glinter/models/checkpoint_utils.py
+!glinter/glinter/models/msa_model_train.py
 !glinter/glinter
 # Byte-compiled / optimized / DLL files
 __pycache__/
