@@ -164,7 +164,7 @@ for pdb in tqdm(pdb_list):
             print('error when pdb2pqr l: '+pdbfile_l[0:4])
 
         try:
-            os.system(pdb2pqr+' '+pdb_folder + pdbfile_r+' '+pdbfile_l[0:4]+'-r.pqr' + apbsflag + ' ' + pdbfile_l[0:4]+'-r.in')
+            os.system(pdb2pqr+' '+pdb_folder + pdbfile_r+' '+pdbfile_r[0:4]+'-r.pqr' + apbsflag + ' ' + pdbfile_r[0:4]+'-r.in')
         except:
             print('error when pdb2pqr r: '+pdbfile_r[0:4])
 
