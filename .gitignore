@@ -3,8 +3,10 @@ __pycache__/
 pinet.egg-info/
 *seg
 PInet/seg/
+PInet/data/PreProcessLifeSavor_af.py
 PInet/data/dbd/
 PInet/data/exon/
+PInet/data/BioGRID/
 PInet/data/our/
 PInet/data/pdb/
 PInet/data/test/
@@ -30,6 +32,7 @@ PInet/old/utils/new*
 PInet/old/utils/run*
 PInet/old/plot_results.py
 PInet/old/results*
+PInet/old/run_clust*.sh
 
 # glinter
 # old
@@ -40,6 +43,7 @@ glinter/ckpts/model*
 glinter/ckpts/t*
 glinter/ckpts/24-01-09/
 glinter/ckpts/old/
+glinter/ckpts/CLUST*
 glinter/ckpts/CONTACT*
 glinter/ckpts/RUNTIME*
 glinter/ckpts/PISA*
@@ -67,6 +71,7 @@ glinter/data/int_exon_pairs.txt
 # examples
 glinter/examples/old
 glinter/examples/PDB
+glinter/examples/alphafold
 glinter/examples/*_*.pdb
 # script to check if the matrix is loaded correctly
 glinter/examples/load_matrix.py 
@@ -109,6 +114,7 @@ __pycache__/
 # dmasif
 dmasif/surface_data/raw/01-benchmark_surfaces_npy/*
 dmasif/surface_data/raw/01-benchmark_pdbs/*
+dmasif/surface_data/
 dmasif/shape_index/
 dmasif/masif_preds/
 dmasif/runs/
@@ -125,6 +131,8 @@ dmasif/data_analysis/.ipynb_checkpoints/
 dmasif/.ipynb_checkpoints/
 dmasif/results/
 dmasif/run_clust*
+dmasif/from_protein*
+dmasif/move*
 
 # C extensions
 *.so
@@ -159,6 +167,7 @@ ppDL_models/*
 !ppDL_models/dmasif
 ppDL_models/dmasif/CONTACT
 ppDL_models/dmasif/CLUST_CONTACT
+ppDL_models/dmasif/CLUST_old
 ppDL_models/dmasif/PISA
 ppDL_models/dmasif/EPPIC
 run_experiments/run_results_random.sh
@@ -170,6 +179,7 @@ analyse_results/plots
 
 
 analyse_results/intermed_scripts/
+analyse_results/dataset_features/
 
 # our data folders
 data_collection/analysis
@@ -183,6 +193,7 @@ data_collection/seq_sim_scripts
 data_collection/processed_dmasif
 !data_collection/uniprot_EnsemblExonPDB_map/P10321_1efx_A.txt
 !data_collection/uniprot_EnsemblExonPDB_map/P52292_1efx_C.txt
+data_collection/BioGRID
 data_collection/cv_splits/*
 !data_collection/cv_splits/EXAMPLE/*
 !data_collection/cv_splits/EXAMPLE
@@ -193,8 +204,15 @@ data_collection/cv_splits/*
 
 archive
 plots
+.vscode
 
-Protein_MAE/.gitignore*
+ProteinMAE/search/models/TS_32*
+ProteinMAE/search/models/CLUS*
+ProteinMAE/search/models/Transformer*
+ProteinMAE/Pointnet*
+ProteinMAE/search/runs
+ProteinMAE/search/results
+
 CDPred
 Student_data
 test_student
@@ -207,4 +225,9 @@ collect
 analyse_results/*.png
 RRI_results_CLUST*
 get_RRI.sh
+quick_auroc.py
+ppDL_pickle.py
 analyse_results/intermed_store
+*.csv
+*.pkl
+*.tsv
