@@ -13,10 +13,10 @@ from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curv
 #%%
 parser = argparse.ArgumentParser(description='Test significance.')
 parser.add_argument('-mh', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')#dMaSIF,PInet,GLINTER,
-parser.add_argument('-p', '--pp', type=str, default="AA", help='Preprocessings to test')
-parser.add_argument('-d', '--dataset', type=str, default="CONTACT,PISA,EPPIC", help='Datasets to test')
+parser.add_argument('-p', '--pp', type=str, default="DL", help='Preprocessings to test')
+parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=int, default=0, help='Sampling on or off, is recommanded for AUROC')
-parser.add_argument('-mr','--metric', type=str, default="AUROC", help='Metric to plot, choose between AUPRC, AUROC, Fscore, Precision, Recall, for Precision and Recall you need to provide alpha')
+parser.add_argument('-mr','--metric', type=str, default="AUPRC", help='Metric to plot, choose between AUPRC, AUROC, Fscore, Precision, Recall, for Precision and Recall you need to provide alpha')
 parser.add_argument('-a','--alpha', type=float, default=0.05, help='Threshold for precision and recall')
 parser.add_argument('-c','--conf_matrix', type=int, default=0, help='Confusion matrix')
 parser.add_argument('-csv','--csv', type=int, default=0, help='Create csv file with all results')
@@ -103,9 +103,24 @@ def plot_methods(ax, methods, datasets, data_dicts, num_settings, bar_width, fon
         for i, (key, value) in enumerate(grouped_data.items()):
             tool, setting = key.split(' ')[0], key.split(' ')[1:]
             setting_label = ' '.join(setting)
+            print(setting_label, setting)
             bar_position = (method_index * (num_settings + 1) + i) * bar_width
-            ax.bar(bar_position, value[0], bar_width, yerr=value[1], color=color_map[setting_label], label=f'{setting_label}')
-            if (args.pp == "DL" or args.pp == "Max") and args.metric == "AUPRC":
+            #ax.bar(bar_position, value[0], bar_width, yerr=value[1], color=color_map[setting_label], label=f'{setting_label}')
+            # Plot the bar (mean only, no error bar)
+            ax.bar(bar_position, value[0], bar_width, color=color_map[setting_label], label=f'{setting_label}')
+
+            # Overlay individual data points (assuming `individual_scores` contains them)
+            # Shift x slightly to avoid overlapping with the bar edges
+            #(np.random.rand(len(value[1]))) * bar_width/5 + bar_position
+            jitter = np.linspace(-bar_width / 3, bar_width / 3, len(value[1]))
+            ax.scatter(jitter + bar_position,
+                       value[1],
+                       color=color_map[setting_label], alpha=1, s=15, 
+                       label='_nolegend_', edgecolors='black',
+                       linewidth=0.3, zorder=2, marker='o')
+
+
+            if (args.pp == "DL" or args.pp == "Max") and args.metric == "AUPRC" and datasets[0] == "CONTACT":
                 if i % 3 == 0: # CONTACT
                     hline_height = 0.2209280904
                 elif i % 3 == 1: # PISA
@@ -114,14 +129,31 @@ def plot_methods(ax, methods, datasets, data_dicts, num_settings, bar_width, fon
                     hline_height = 0.3609405375
                 ax.hlines(hline_height, bar_position - bar_width/2, bar_position + bar_width/2, color='gray', linestyle='solid', label='_nolegend_')
 
-            elif args.pp == "AA" and args.metric == "AUPRC":
+            elif args.pp == "AA" and args.metric == "AUPRC" and datasets[0] == "CONTACT":
                 if i % 3 == 0: # CONTACT
                     hline_height = 0.002656900248
                 elif i % 3 == 1: # PISA
                     hline_height = 0.002456525148
                 elif i % 3 == 2: # EPPIC
                     hline_height = 0.002704997385
+
+            elif args.pp == "AA" and args.metric == "AUPRC" and datasets[0] == "CLUST_CONTACT":
+                if i % 3 == 0: # CLUST_CONTACT
+                    hline_height = 0.00261823615266007
+                elif i % 3 == 1: # CLUST_PISA
+                    hline_height = 0.002893609026835760
+                elif i % 3 == 2: # CLUST_EPPIC
+                    hline_height = 0.00308511574578032
+
+            elif (args.pp == "Max" or args.pp == "DL") and args.metric == "AUPRC" and datasets[0] == "CLUST_CONTACT":
+                if i % 3 == 0: # CONTACT
+                    hline_height = 0.20944126556714912
+                elif i % 3 == 1: # PISA
+                    hline_height = 0.39322301024428685
+                elif i % 3 == 2: # EPPIC
+                    hline_height = 0.3615733736762481
             #ax.axvline(bar_position + bar_width, color='black', linewidth=0.5, linestyle='--', ymax=hline_height)
+            if args.metric == "AUPRC":
                 ax.hlines(hline_height, bar_position - bar_width/2, bar_position + bar_width/2, color='gray', linestyle='solid', label='_nolegend_')
            
     
@@ -137,28 +169,35 @@ def plot_methods(ax, methods, datasets, data_dicts, num_settings, bar_width, fon
     # set lim to 0-1
     if metric_string == "AUROC" and args.pp == "DL":
         ax.set_ylim([0, 0.8])
+    elif metric_string == "AUPRC" and args.pp == "AA":
+        ax.set_ylim([0, 0.05])
     else:
         # get the max value of the data
         max_value = 0
         for key, values in data_dicts.items():
             for key, value in values.items():
-                max_value = max(max_value, np.max(value[0]+value[1]))
+                max_value = max(max_value, np.max(value[0]+np.std(value[1])))
         ax.set_ylim([0, max_value + max_value/10])
     #plt.yticks(y_ticks, fontsize=font_size)
 
 all_methods = ["dMaSIF", "PInet", "GLINTER", "ProteinMAE"]
 all_pps = ["AA", "Max", "DL"]
-all_datasets = ["CONTACT","PISA", "EPPIC"]
+all_datasets = ["CLUST_CONTACT","CLUST_PISA", "CLUST_EPPIC"]
 
 dict_groups = methods
 
 #plt.figure(figsize=(6,6))
 data = dict()   
 use_all = True 
-if os.path.exists(f"../results/plots/all_{alphas[0]}.npy") and use_all:
-    data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item()  
+# if there is CLUST in dataset names
+if "CLUST" in datasets[0]:
+    if os.path.exists(f"../results/plots/all_clust{alphas[0]}_4.npy") and use_all:
+        data = np.load(f"../results/plots/all_clust{alphas[0]}_4.npy", allow_pickle=True).item()  
+else:
+    if os.path.exists(f"../results/plots/all_{alphas[0]}.npy") and use_all:
+        data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item()
 
-# to generate intermediate results for faster plotting
+# to generate intermediate results for faster plotting set to True
 if False:
     for l, pp in enumerate(pps): 
         # Loop over each combination of method and preprocessing
@@ -178,15 +217,17 @@ if False:
                 f1s = list()
                 mccs = list()
                 #alphas = [0.01]
-                for fold in tqdm(range(1, 6)):
-                    if not os.path.exists(f"../results/{experiment}/{dataset}_back_fold{fold}.npy"):
-                        #print(f"../results/{experiment}/{dataset}_back_fold{fold}.npy")
-                        continue                   
+                for fold in tqdm(range(1, 6)):                
                     # Load data or calculate data (replace this part with your actual data loading)
-                    pos = np.load(f"../results/{experiment}/{dataset}_pos_fold{fold}.npy")
-                    neg = np.load(f"../results/{experiment}/{dataset}_neg_fold{fold}.npy")
+                    pos = np.load(f"../results/{experiment}/{dataset}_test_pos_fold{fold}.npy")
+                    neg = np.load(f"../results/{experiment}/{dataset}_test_neg_fold{fold}.npy")
 
-                    background = np.load(f"../results/{experiment}/{dataset}_back_fold{fold}.npy")
+                    background = np.load(f"../results/{experiment}/{dataset}_train_neg_fold{fold}.npy")
+
+                    #pos_val = np.load(f"../results/{experiment}/{dataset}_val_pos_fold{fold}.npy")
+                    #neg_val = np.load(f"../results/{experiment}/{dataset}_val_neg_fold{fold}.npy")
+                    # concatenate background and val
+                        #background = np.concatenate((background, val))
                     if conf_matrix:
                         # plot the confusion matrix
                         y_true = np.concatenate((np.ones(len(pos), dtype=int), np.zeros(len(neg), dtype=int)))
@@ -204,11 +245,11 @@ if False:
                                     xticklabels=['Pred. Non-Int.', 'Pred. Int'], 
                                     yticklabels=['True Non-Int', 'True Int'], cbar=False)
                         #plt.title(f"Confusion matrix for {method} {dataset} - {pp}")
-                        if dataset == "CONTACT":
+                        if dataset == all_datasets[0]:
                             dat_set = "$D_{Con}$"
-                        elif dataset == "PISA":
+                        elif dataset == all_datasets[1]:
                             dat_set = "$D_{Engy}$"
-                        else:
+                        elif dataset == all_datasets[2]:
                             dat_set = "$D_{Evol}$"
                         axes[fold-1, d].set_title(f"{dat_set} (fold {fold})")
 
@@ -223,6 +264,7 @@ if False:
                         pred = np.concatenate((pos, neg))
                         fpr, tpr, thresholds = roc_curve(true, pred)
                         auc_score = roc_auc_score(true, pred)
+                        print(auc_score)
                         aucs.append(auc_score)
 
 
@@ -308,82 +350,13 @@ if False:
     #print(data)
 
     # save dict to file to faster load it
-    np.save(f"../results/plots/all_{alphas[0]}_{pp}.npy", data)
+    np.save(f"../results/plots/all_clust{alphas[0]}_4.npy", data)
     exit()
 
 # Extract settings
 # only keep the keys that have one "p" in it
 pp = pps[0]
 data = {key: value for key, value in data.items() if pp in key}
-
-if create_csv:
-    # map format to fit google sheet for one method
-    alphas = [0.01, 0.02, 0.03, 0.04, 0.05]
-    with open(f"{pp}_1.csv", "w") as f:
-        if pp == "AA":    
-            f.write("RRI,MCC,,,,,,,F-score,,,,,,,Precision,,,,,,,Recall,,,,,,,\n")
-
-        elif pp == "Max":
-            f.write("PPMax,MCC,,,,,,,F-score,,,,,,,Precision,,,,,,,Recall,,,,,,,,\n")
-        elif pp == "DL":
-            f.write("PPDL,MCC,,,,,,,F-score,,,,,,,Precision,,,,,,,Recall,,,,,,,,\n")
-        f.write(",Fold1,Fold2,Fold3,Fold4,Fold5,Mean,,Fold1,Fold2,Fold3,Fold4,Fold5,Mean,,Fold1,Fold2,Fold3,Fold4,Fold5,Mean,,Fold1,Fold2,Fold3,Fold4,Fold5,Mean,,\n")
-        for method in methods:
-            f.write(f"{method},\n")
-            for alpha in alphas: 
-                if os.path.exists(f"../results/plots/all_{alpha}.npy") and use_all:
-                    data = np.load(f"../results/plots/all_{alpha}.npy", allow_pickle=True).item()  
-                else:
-                    print("problems exiting")
-                    exit()
-                f.write(f"Threshold: {alpha},\n")
-                for dataset in datasets:
-                    if dataset == "CONTACT":
-                        f.write(f"D_Con,")
-                    elif dataset == "PISA":
-                        f.write(f"D_Engy,")
-                    elif dataset == "EPPIC":
-                        f.write(f"D_Evol,")
-                    for metric in ["MCC", "Fscore", "Precision", "Recall"]:
-                        #print(data.keys())
-                        key = f"{method} {dataset} - {pp} - {metric}"
-                        if key in data:
-                            values = data[key][:,0]
-                            f.write(f"{values[0]},{values[1]},{values[2]},{values[3]},{values[4]},{np.nanmean(values)},,")
-                    f.write("\n")
-                f.write("\n")
-    f.close()
-
-
-    with open(f"{pp}_2.csv", "w") as f:
-        f.write(",AU-ROC,,,,,,,AU-PRC,,\n")
-        f.write(",Fold1,Fold2,Fold3,Fold4,Fold5,Mean,,Fold1,Fold2,Fold3,Fold4,Fold5,Mean,\n\n")
-        for method in methods:
-            f.write(f"{method},\n") 
-            if os.path.exists(f"../results/plots/all_{alpha}.npy") and use_all:
-                data = np.load(f"../results/plots/all_{alpha}.npy", allow_pickle=True).item()  
-            else:
-                print("problems exiting")
-                exit()
-            for dataset in datasets:
-                if dataset == "CONTACT":
-                    f.write(f"D_Con,")
-                elif dataset == "PISA":
-                    f.write(f"D_Engy,")
-                elif dataset == "EPPIC":
-                    f.write(f"D_Evol,")
-                for metric in ["AUROC", "AUPRC"]:
-                    #print(data.keys())
-                    key = f"{method} {dataset} - {pp} - {metric}"
-                    if key in data:
-                        values = data[key]
-                        f.write(f"{values[0]},{values[1]},{values[2]},{values[3]},{values[4]},{np.nanmean(values)},,")
-                f.write("\n")
-            f.write("\n")
-    f.close()     
-
-    exit()
-
 
 #print(data)
 font_size = 16
@@ -398,14 +371,17 @@ all_colors = ['lightblue', 'lightskyblue', 'royalblue', 'palegreen', 'limegreen'
 for dataset in datasets:
     for pp in pps:
         color_map[f'{dataset} - {pp} - {metric_string}'] = all_colors[all_datasets.index(dataset)*3]#+all_pps.index(pp)]
-
+        print(f'{dataset} - {pp} - {metric_string}')
 # get mean and std for each key in data
 for key,values in data.items():
-    data[key] = [np.mean(values, axis=0), np.std(values, axis=0)]
+    #data[key] = [np.mean(values, axis=0), np.std(values, axis=0)]
+    data[key] = [np.mean(values, axis=0), values]
 
 # only keep the keys that have the metric_string in it
 data = {key: value for key, value in data.items() if metric_string in key}
+
 # keep only the keys that have the pp in it
+
 data = {key: value for key, value in data.items() if pp + " -" in key}
 settings = list({key: value for key, value in data.items() if 'dMaSIF' in key}.keys())
 num_settings = len(settings)
@@ -416,9 +392,9 @@ x_ticks_labels = []
 if "dMaSIF" in methods:
     dMaSIF_data = {key: value for key, value in data.items() if 'dMaSIF' in key}
     # Group data by dataset
-    dMaSIF_contact_data = {key: value for key, value in dMaSIF_data.items() if 'CONTACT' in key}
-    dMaSIF_pisa_data = {key: value for key, value in dMaSIF_data.items() if 'PISA' in key}
-    dMaSIF_eppic_data = {key: value for key, value in dMaSIF_data.items() if 'EPPIC' in key}
+    dMaSIF_contact_data = {key: value for key, value in dMaSIF_data.items() if all_datasets[0] in key}
+    dMaSIF_pisa_data = {key: value for key, value in dMaSIF_data.items() if all_datasets[1] in key}
+    dMaSIF_eppic_data = {key: value for key, value in dMaSIF_data.items() if all_datasets[2] in key}
 
     dMaSIF_grouped_data = {**dMaSIF_contact_data, **dMaSIF_pisa_data, **dMaSIF_eppic_data}
     data_dicts["dMaSIF"] = dMaSIF_grouped_data
@@ -429,9 +405,9 @@ if "dMaSIF" in methods:
 if "PInet" in methods:
     PInet_data = {key: value for key, value in data.items() if 'PInet' in key}
     # Group data by dataset
-    PInet_contact_data = {key: value for key, value in PInet_data.items() if 'CONTACT' in key}
-    PInet_pisa_data = {key: value for key, value in PInet_data.items() if 'PISA' in key}
-    PInet_eppic_data = {key: value for key, value in PInet_data.items() if 'EPPIC' in key}
+    PInet_contact_data = {key: value for key, value in PInet_data.items() if all_datasets[0] in key}
+    PInet_pisa_data = {key: value for key, value in PInet_data.items() if all_datasets[1] in key}
+    PInet_eppic_data = {key: value for key, value in PInet_data.items() if all_datasets[2] in key}
 
     PInet_grouped_data = {**PInet_contact_data, **PInet_pisa_data, **PInet_eppic_data}
     data_dicts["PInet"] = PInet_grouped_data
@@ -442,9 +418,9 @@ if "PInet" in methods:
 if "GLINTER" in methods:
     glinter_data = {key: value for key, value in data.items() if 'GLINTER' in key}
     # Group data by dataset
-    glinter_contact_data = {key: value for key, value in glinter_data.items() if 'CONTACT' in key}
-    glinter_pisa_data = {key: value for key, value in glinter_data.items() if 'PISA' in key}
-    glinter_eppic_data = {key: value for key, value in glinter_data.items() if 'EPPIC' in key}
+    glinter_contact_data = {key: value for key, value in glinter_data.items() if all_datasets[0] in key}
+    glinter_pisa_data = {key: value for key, value in glinter_data.items() if all_datasets[1] in key}
+    glinter_eppic_data = {key: value for key, value in glinter_data.items() if all_datasets[2] in key}
 
     glinter_grouped_data = {**glinter_contact_data, **glinter_pisa_data, **glinter_eppic_data}
     data_dicts["GLINTER"] = glinter_grouped_data
@@ -455,29 +431,15 @@ if "GLINTER" in methods:
 if "ProteinMAE" in methods and not "pretrained" in methods:
     proteinmae_data = {key: value for key, value in data.items() if 'ProteinMAE' in key and not "pretrained" in key}
     # Group data by dataset
-    proteinmae_contact_data = {key: value for key, value in proteinmae_data.items() if 'CONTACT' in key}
-    proteinmae_pisa_data = {key: value for key, value in proteinmae_data.items() if 'PISA' in key}
-    proteinmae_eppic_data = {key: value for key, value in proteinmae_data.items() if 'EPPIC' in key}
+    proteinmae_contact_data = {key: value for key, value in proteinmae_data.items() if all_datasets[0] in key}
+    proteinmae_pisa_data = {key: value for key, value in proteinmae_data.items() if all_datasets[1] in key}
+    proteinmae_eppic_data = {key: value for key, value in proteinmae_data.items() if all_datasets[2] in key}
 
     proteinmae_grouped_data = {**proteinmae_contact_data, **proteinmae_pisa_data, **proteinmae_eppic_data}
     data_dicts["ProtMAE"] = proteinmae_grouped_data
 
     # add x_ticks_labels
     x_ticks_labels.append("ProteinMAE")
-
-#if "pretrained_ProteinMAE" in methods:
-#    preproteinmae_data = {key: value for key, value in data.items() if 'pretrained_ProteinMAE' in key}
-#    # Group data by dataset
-#    preproteinmae_contact_data = {key: value for key, value in preproteinmae_data.items() if 'CONTACT' in key}
-#    preproteinmae_pisa_data = {key: value for key, value in preproteinmae_data.items() if 'PISA' in key}
-#    preproteinmae_eppic_data = {key: value for key, value in preproteinmae_data.items() if 'EPPIC' in key}
-#
-#    preproteinmae_grouped_data = {**preproteinmae_contact_data, **preproteinmae_pisa_data, **preproteinmae_eppic_data}
-#    data_dicts["pre_P-MAE"] = preproteinmae_grouped_data
-#
-#    # add x_ticks_labels
-#    x_ticks_labels.append("preP-MAE")
-
 
 number_tools = len(methods)
 
@@ -504,5 +466,5 @@ if args.metric == "AUPRC":
     ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
 #else:
 #    ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
-plt.savefig(f"plots/{pp}_{metric_string}_random.png", dpi=600, bbox_inches='tight')
+plt.savefig(f"CLUST_{pp}_{metric_string}_results_color.png", dpi=600, bbox_inches='tight')
 

@@ -39,7 +39,7 @@ def get_results(alphas, pos_dist, neg_dist, background):
 parser = argparse.ArgumentParser(description='Test significance.')
 parser.add_argument('-m', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')
 parser.add_argument('-p', '--pp', type=str, default="DL", help='Preprocessings to test')
-parser.add_argument('-d', '--dataset', type=str, default="CONTACT,PISA,EPPIC", help='Datasets to test')
+parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=bool, default=True, help='Sampling on or off')
 parser.add_argument('-a', '--auroc', type=bool, default=False, help='Set to True if you want to know AUROC and AUPRC')
 args = parser.parse_args()
@@ -49,7 +49,7 @@ datasets = args.dataset.split(",")
 sampling_on = args.sampling
 auroc_on = args.auroc
 evals = ["Precision", "Recall", "Fscore", "MCC"]
-pick_dataset = "EPPIC"
+pick_dataset = "CLUST_EPPIC"
 get_index_dataset = datasets.index(pick_dataset)
 
 font_size = 16
@@ -65,8 +65,12 @@ print(thresholds)
 ranked_results = np.zeros((len(thresholds), len(methods), len(datasets), len(evals), 5))
 for t, threshold in enumerate(thresholds):
         # load the results
-        if os.path.exists(f"../results/plots/all_{threshold}.npy"):
-            data = np.load(f"../results/plots/all_{threshold}.npy", allow_pickle=True).item() 
+        if datasets[0] == "CLUST_CONTACT":
+            if os.path.exists(f"../results/plots/all_clust{threshold}.npy"):
+                data = np.load(f"../results/plots/all_clust{threshold}.npy", allow_pickle=True).item() 
+        elif datasets[0] == "CONTACT":
+            if os.path.exists(f"../results/plots/all_{threshold}.npy"):
+                data = np.load(f"../results/plots/all_{threshold}.npy", allow_pickle=True).item()
         for j, method in enumerate(methods):
             for i, dataset in enumerate(datasets):
                 for k, metric in enumerate(evals):
@@ -115,7 +119,7 @@ for i in range(num_bars):
     bars = ax.bar(indices, counts[:, i], bottom=bottom, color=colors[i], label=methods[i])#color=colors[i], 
     # Add text annotations
     for bar, value in zip(bars, counts[:, i]):
-        if value > 3:
+        if value > 2:
             height = bar.get_height()
             if value == 24:
                 ax.text(
@@ -140,7 +144,7 @@ for i in range(num_bars):
             else:
                 ax.text(
                     bar.get_x() + bar.get_width() / 2, 
-                    bar.get_y() + height / 2, 
+                    bar.get_y() + height / 2-0.25, 
                     f'{value}', 
                     ha='center', 
                     va='center', 
@@ -166,8 +170,7 @@ ax.set_ylabel('Number of performance tests', fontsize=font_size)
 
 plt.tight_layout()
 #Save figure
-plt.savefig(f'plots/{pps[0]}_ranked_ECCB.png', dpi=600)
-
+#plt.savefig(f'{pps[0]}_ranked_ECCB.png', dpi=600)
 
 # create bar plots with error bar for Fscore only but the 5 different thresholds
 # take the mean over the last dimension and get the standard deviation over the last dimension
@@ -180,25 +183,58 @@ fig, ax = plt.subplots()
 
 # Select the relevant data
 x_ticks = np.arange(mean_fscore.shape[0])  # dim0
-mean_values_0 = mean_fscore[:, :, get_index_dataset, 2]    # second last dim: 1 = PISA, 0 = CONTACT 2 = EPPIC, last dim: 2 = Fscore, 1 = Recall, 0 = Precision, 3 = MCC
+
+mean_values_0 = mean_fscore[:, :, get_index_dataset, 2]    #slast dim: 2 = Fscore, 1 = Recall, 0 = Precision, 3 = MCC
 std_values_0 = std_fscore[:, :, get_index_dataset, 2]      # same here
 # 5 thresholds, 4 methods, 3 datasets, 4 metrics, 5 test sets
 #evals = ["Precision", "Recall", "Fscore", "MCC"]
 # Bar Width to fit 5 bars in one group
-bar_width = 0.15
+bar_width = 0.2
 
 # Plotting the bars with height mean and error bars with std
-for i in range(mean_values_0.shape[1]):
+#for i in range(mean_values_0.shape[1]):
+#    ax.bar(
+#        x_ticks + i * bar_width, 
+#        mean_values_0[:, i], 
+#        bar_width, 
+#        yerr=std_values_0[:, i], 
+#        label=methods[i], 
+#        color=colors[i]
+#    )
+for i in range(mean_values_0.shape[1]):  # methods
+    bar_positions = x_ticks + i * bar_width
     ax.bar(
-        x_ticks + i * bar_width, 
-        mean_values_0[:, i], 
-        bar_width, 
-        yerr=std_values_0[:, i], 
-        label=methods[i], 
-        color=colors[i]
+        bar_positions,
+        mean_values_0[:, i],
+        bar_width,
+        label=methods[i],
+        color=colors[i],
+        alpha=1
     )
+
+    # Overlay individual data points (5 test sets)
+    for j in range(mean_values_0.shape[0]):  # thresholds
+        # Get individual values (5 test sets)
+        data_points = ranked_results[j, i, get_index_dataset, 2, :]  # shape: (5,)
+        
+        # Jitter for individual points so they don't overlap
+        #jitter = (np.random.rand(len(data_points)) - 0.5) * bar_width * 0.6
+        # ax.scatter(
+        #     np.full_like(data_points, bar_positions[j]),# + jitter,
+        #     data_points,
+        #     color=colors[i],
+        #     s=20,
+        #     alpha=1,
+        #     edgecolor='black'
+        # )
+        jitter = np.linspace(-bar_width / 4, bar_width / 4, len(data_points))
+        ax.scatter(jitter + bar_positions[j],
+                   data_points,
+                   color=colors[i], alpha=1, s=10, 
+                   label='_nolegend_', edgecolors='black',
+                   linewidth=0.3, zorder=2, marker='o')
 # Set the xticks and labels
-ax.set_xticks(indices)
+ax.set_xticks(indices+0.275)
 ax.set_xticklabels([f'{i+1}%' for i in indices], fontsize=font_size)
 #ax.set_title(pps[0])
 
@@ -209,7 +245,9 @@ ax.set_ylabel('F-score', fontsize=font_size)
 ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 
 # Add a legend
-ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.5, -0.02))
+#ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.5, -0.02))
+#plt.title(f'{pps[0]} - {pick_dataset} - F-score', fontsize=font_size)
 plt.tight_layout()
 # Save the figure
-plt.savefig(f'plots/{pps[0]}_{pick_dataset}_fscore.png', dpi=300)
+print(f'{pps[0]}_{pick_dataset}_fscore_color.png')
+plt.savefig(f'{pps[0]}_{pick_dataset}_fscore_color.png', dpi=300)

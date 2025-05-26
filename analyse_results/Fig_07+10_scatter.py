@@ -11,8 +11,8 @@ from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curv
 #%%
 parser = argparse.ArgumentParser(description='Test significance.')
 parser.add_argument('-mh', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')
-parser.add_argument('-p', '--pp', type=str, default="Max,DL", help='Preprocessings to test')
-parser.add_argument('-d', '--dataset', type=str, default="CONTACT,PISA,EPPIC", help='Datasets to test')
+parser.add_argument('-p', '--pp', type=str, default="AA,DL", help='Preprocessings to test')
+parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=int, default=0, help='Sampling on or off, is recommanded for AU-ROC')
 args = parser.parse_args()
 methods = args.method.split(",")
@@ -50,11 +50,10 @@ metrics = ["AUROC", "AUPRC", "Fscore", "Precision", "Recall", "MCC"]
 metric_legend = ["AU-ROC", "AU-PRC", "F-score", "Precision", "Recall", "MCC"]
 all_methods = ["dMaSIF", "PInet", "GLINTER", "ProteinMAE"]
 all_pps = ["AA", "Max", "DL"]
-all_datasets = ["CONTACT","PISA", "EPPIC"]
+all_datasets = ["CLUST_CONTACT","CLUST_PISA", "CLUST_EPPIC"]
 plt.figure(figsize=(6,6))
 
 metric_marker = ["o", "p", "X", "*", "^", "s"]
-#method_color = ["#0000a7", "#008176", "#eecc16", "#ff7f0e"]#, "#d62728"]
 method_color = ["tab:blue", "tab:green", "tab:orange", "tab:purple"]
 dataset_density = [0.2,0.5,1]
 
@@ -63,7 +62,11 @@ for e, metric_string in enumerate(metrics):
     metric_check = True
     data = dict()        
     for alphas in [[0.01],[0.02],[0.03],[0.04],[0.05]]: #
-        data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item() 
+        if "CLUST" in datasets[0]:
+            data = np.load(f"../results/plots/all_clust{alphas[0]}.npy", allow_pickle=True).item()  
+        else:
+            data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item()
+        #data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item() 
 
         data_Max = dict()
         data_DLs = dict()
@@ -87,8 +90,12 @@ for e, metric_string in enumerate(metrics):
         if metric_string == "AUPRC" or metric_string == "AUROC":
             metric_check = False
 plt.plot([0,1],[0,1], color='gray', linestyle='--', linewidth=0.5)
-plt.xlim(0,0.8)
-plt.ylim(0,0.8)
+if pps[0] == "Max":
+    plt.xlim(0,0.85)
+    plt.ylim(0,0.85)
+else:
+    plt.xlim(0,1)
+    plt.ylim(0,1)
 fontsize = 16
 if pps[0] == "AA":
     #plt.title("RRI vs PPDL", fontsize=fontsize)
@@ -125,13 +132,9 @@ plt.xticks(fontsize=fontsize)
 plt.yticks(fontsize=fontsize)
 
 leg = plt.legend(legend_elements, labels, loc='lower left', fontsize=fontsize-3, bbox_to_anchor=(1.02, -0.03))
-plt.savefig(f"plots/{pps[0]}_{pps[1]}_08.png", dpi=600, \
+plt.savefig(f"{pps[0]}_{pps[1]}_CLUST.png", dpi=600, \
                 bbox_extra_artists=(leg,), bbox_inches='tight')
-#if sampling_on:
-#    plt.savefig(f"results/plots/DLsVSDL_all_sampling_{alphas[0]}.png", dpi=300)
-#else:
-#    plt.savefig(f"results/plots/scatter/AAaVSDL_all_c.png", dpi=600, \
-#                bbox_extra_artists=(leg,), bbox_inches='tight')
+
 plt.close()
 
 

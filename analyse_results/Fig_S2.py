@@ -1,7 +1,7 @@
 import numpy as np
 
-pos = np.load("../results/dMaSIF_DL/CONTACT_pos_fold3.npy")
-back = np.load("../results/dMaSIF_DL/CONTACT_back_fold3.npy")
+pos = np.load("../results/dMaSIF_DL/CLUST_CONTACT_test_pos_fold1.npy")
+back = np.load("../results/dMaSIF_DL/CLUST_CONTACT_train_neg_fold1.npy")
 
 alpha = 0.05
 
@@ -15,15 +15,6 @@ hist1, bins1, _ = plt.hist(pos, color="b", weights=np.ones(len(pos)) / len(pos),
 
 
 hist2, bins2, _ = plt.hist(back, color="orange", weights=np.ones(len(back)) / len(back), bins=bin_intervals, alpha=0.8, label="Non-interacting exon pairs (training set)")
-#n, bins, patches = plt.hist(pos, color="b", density=True, bins=10, label="interacting exon pairs (test set)")
-#y = ((1 / (np.sqrt(2 * np.pi) * np.std(pos))) *
-#     np.exp(-0.5 * (1 / np.std(pos) * (bins - np.mean(pos)))**2))
-#plt.plot(bins, y, '--')
-
-#plt.hist(back, color="orange", density=True, bins=10, alpha=0.8, label="non-interacting exon pairs (training set)")
-#y = ((1 / (np.sqrt(2 * np.pi) * np.std(back))) *
-#     np.exp(-0.5 * (1 / np.std(back) * (bins - np.mean(back)))**2))
-#plt.plot(bins, y, '--')
 
 cutoff = np.percentile(back, (1 - alpha) * 100)
 
@@ -43,5 +34,5 @@ plt.axvline(cutoff, color='r', linestyle='dashed', linewidth=1, label="Threshold
 plt.legend(loc="upper right")
 plt.ylabel("Fraction of exon pairs", labelpad=15)
 plt.xlabel("Predicted EEI scores", labelpad=15)
-plt.savefig("../results/plots/example_hist_bin10.png", dpi=600, bbox_inches="tight")
+plt.savefig("Fig_S2.png", dpi=600, bbox_inches="tight")
 
