@@ -11,6 +11,7 @@ from models.dmasif import *
 
 from scipy.spatial.distance import cdist
 from collections import defaultdict
+import pickle
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -37,9 +38,12 @@ def save_residue_max_per_exon(_protein_pair_id, _outputs1, _outputs2, _xyz1, _xy
         proteins = _proteins[i]
 
         pdb_dir = Path(args.pdb_dir)
-        protein_pair_id = protein_pair_id.split("_")
-        pdb_id1 = protein_pair_id[0] + "_" + protein_pair_id[1]
-        pdb_id2 = protein_pair_id[0] + "_" + protein_pair_id[2]
+        #protein_pair_id = protein_pair_id.split("_")
+        #pdb_id1 = protein_pair_id[0] + "_" + protein_pair_id[1]
+        #pdb_id2 = protein_pair_id[0] + "_" + protein_pair_id[2]
+
+        pdb_id1 = protein_pair_id.split("\t")[0]
+        pdb_id2 = protein_pair_id.split("\t")[1]
 
         proteins = proteins.split("\t")
         protein1 = proteins[0]
@@ -55,12 +59,12 @@ def save_residue_max_per_exon(_protein_pair_id, _outputs1, _outputs2, _xyz1, _xy
             print(embedding2)
         # pdb_id1
         parser=PDBParser(PERMISSIVE=1)
-        structure=parser.get_structure("structure", f"{pdb_dir}/{pdb_id1}.pdb")
+        structure=parser.get_structure("structure", f"{pdb_dir}/{pdb_id1}_reduce.pdb")
         atom_coords1 = np.stack([atom.get_coord() for atom in structure.get_atoms()])
 
         # pdb_id2 # remove this when not testing and take coord2 and embedding2 from running model
         parser=PDBParser(PERMISSIVE=1)
-        structure2=parser.get_structure("structure", f"{pdb_dir}/{pdb_id2}.pdb")
+        structure2=parser.get_structure("structure", f"{pdb_dir}/{pdb_id2}_reduce.pdb")
         atom_coords2 = np.stack([atom.get_coord() for atom in structure2.get_atoms()])
     
         # from atoms to points for protein 1
@@ -100,29 +104,30 @@ def save_residue_max_per_exon(_protein_pair_id, _outputs1, _outputs2, _xyz1, _xy
         #########################################
 
         # load exon1 information
-        if os.path.exists(f"{exon_dir}/{protein1}_{pdb_id1}.txt"):
-            data1 = np.genfromtxt(f"{exon_dir}/{protein1}_{pdb_id1}.txt", delimiter="\t", dtype=str, skip_header=1)
+        if os.path.exists(f"{exon_dir}/{protein1}.txt"):
+            data1 = np.genfromtxt(f"{exon_dir}/{protein1}.txt", delimiter="\t", dtype=str, skip_header=1)
         else:
             print(f"{exon_dir}/{protein1}_{pdb_id1}.txt")
             print("exon mapping files missing")
 
         # create dict which residue belongs to which exon from 1
-        exon_dict1 = {int(line[-1]): line[0] for line in data1 if line[-1] != "-"}
+        exon_dict1 = {int(line[-3]): line[0] for line in data1 if line[-3] != "-"}
         exons1 = {v: [k for k, val in exon_dict1.items() if val == v] for v in set(exon_dict1.values())}
 
         # load exon2 information
-        if os.path.exists(f"{exon_dir}/{protein2}_{pdb_id2}.txt"):
-            data2 = np.genfromtxt(f"{exon_dir}/{protein2}_{pdb_id2}.txt", delimiter="\t", dtype=str, skip_header=1)
+        if os.path.exists(f"{exon_dir}/{protein2}.txt"):
+            data2 = np.genfromtxt(f"{exon_dir}/{protein2}.txt", delimiter="\t", dtype=str, skip_header=1)
         else:
             print("exon mapping files missing")
 
         # create dict which residue belongs to which exon from 2
-        exon_dict2 = {int(line[-1]): line[0] for line in data2 if line[-1] != "-"}
+        exon_dict2 = {int(line[-3]): line[0] for line in data2 if line[-3] != "-"}
         exons2 = {v: [k for k, val in exon_dict2.items() if val == v] for v in set(exon_dict2.values())}
 
         # create matrix for each exon pair and save it
         exon_find = False
         #pdb_id2 = pdb_id2.split("_")[1]
+        prot_pair = {}
         for ex1 in exons1:
             for ex2 in exons2:
                 exons1_indices = exons1[ex1]
@@ -134,16 +139,25 @@ def save_residue_max_per_exon(_protein_pair_id, _outputs1, _outputs2, _xyz1, _xy
                         exons_values.append(max_values.get(key, 0))
                 matrix = np.array(exons_values).reshape(len(exons1_indices), len(exons2_indices))
                 used = matrix.shape[0] <= 100 and matrix.shape[1] <= 100
+                #print(f"protein1: {protein1}, protein2: {protein2}, ex1: {ex1}, ex2: {ex2}, used: {used}")
+                #print(matrix.shape)
                 if used:
                     exon_find = True
-                    np.save(f"results/{extra}{args.ds_type}/fold{args.fold}/{args.mode}/{protein1}_{protein2}_{pdb_id1}_{pdb_id2}_{ex1}_{ex2}.npy", matrix)
+                    key_dict = (protein1, protein2, ex1, ex2, True)
+                    prot_pair[key_dict] = matrix
+                    #np.save(f"results/{extra}{args.ds_type}/fold{args.fold}/{args.mode}/{protein1}_{protein2}_{ex1}_{ex2}.npy", matrix)
 
                 else:
                     exon_find = True
-                    np.save(f"results/{extra}{args.ds_type}/fold{args.fold}/{args.mode}/{protein1}_{protein2}_{pdb_id1}_{pdb_id2}_{ex1}_{ex2}_big.npy", matrix)
+                    key_dict = (protein1, protein2, ex1, ex2, False)
+                    prot_pair[key_dict] = matrix
+                    #np.save(f"results/{extra}{args.ds_type}/fold{args.fold}/{args.mode}/{protein1}_{protein2}_{ex1}_{ex2}_big.npy", matrix)
 
         if not exon_find:
             print(protein1, protein2, pdb_id1, pdb_id2)
+        # save pickle
+        with open(f"results/{extra}{args.ds_type}/fold{args.fold}/{args.mode}/{protein1}_{protein2}.pkl", "wb") as f:
+            pickle.dump(prot_pair, f)
 
 def iterate(
     net,
@@ -179,7 +193,7 @@ def iterate(
         outputs2 = net(xyz2, normal2, curvature2, dist2, atom_type2)
 
         if args.save_exons:
-            save_residue_max_per_exon(pdb_pair, outputs1, outputs2, xyz1, xyz2, args, proteins, Path(args.exon_dir))
+            save_residue_max_per_exon(pdb_pair, outputs1, outputs2, xyz1, xyz2, args, proteins, Path("../../data_collection/BioGRID/uniprot_Ensembl_Exon_map/"))
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -196,21 +210,21 @@ if __name__ == "__main__":
 
     net = net.to(args.device)
     if args.mode == "train":
-        trainset = Protein_search_exon(phase='train', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
+        trainset = Protein_search_exon(phase='train', data_root = '../../data_collection/processed_dmasif/alphafold_pairs/', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
         dataloader = DataLoader(
         trainset,
         batch_size=args.batch_size,
         num_workers = 0
     )
     elif args.mode == "test":
-        testset = Protein_search_exon(phase='test', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
+        testset = Protein_search_exon(phase='test', data_root = '../../data_collection/processed_dmasif/alphafold_pairs/', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
         dataloader = DataLoader(
         testset,
         batch_size=args.batch_size,
         num_workers=0
         )   
     elif args.mode == "val":
-        testset = Protein_search_exon(phase='val', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
+        testset = Protein_search_exon(phase='val', data_root = '../../data_collection/processed_dmasif/alphafold_pairs/', rot_aug = False, sample_type = 'uniform', sample_num = args.downsample_points, ds_type=args.ds_type, fold=args.fold)
         dataloader = DataLoader(
         testset,
         batch_size=args.batch_size,

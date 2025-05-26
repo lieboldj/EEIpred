@@ -164,13 +164,15 @@ if __name__ == "__main__":
     net = dMaSIF(args)
     net = net.to(args.device)
 
-    with open(f"{args.data_root}{args.ds_type}/train{args.fold}.txt", "r") as f:
-        train = f.readlines()
+    #with open(f"{args.data_root}{args.ds_type}/train{args.fold}.txt", "r") as f:
+    #    train = f.readlines()
     # split train in train 0.9 and val 0.1 store in temp txt files
     with open(f"train{args.fold}_{args.ds_type}_tmp.txt", "w") as f:
-        f.writelines(train[:int(len(train)*0.9)])
+        #f.writelines(train[:int(len(train)*0.9)])
+        f.writelines(open(f"{args.data_root}{args.ds_type}/train{args.fold}.txt", "r").readlines())
     with open(f"val{args.fold}_{args.ds_type}_tmp.txt", "w") as f:
-        f.writelines(train[int(len(train)*0.9):])
+        #f.writelines(train[int(len(train)*0.9):])
+        f.writelines(open(f"{args.data_root}{args.ds_type}/val{args.fold}.txt", "r").readlines())
     with open(f"test{args.fold}_{args.ds_type}_tmp.txt", "w") as f:
         f.writelines(open(f"{args.data_root}{args.ds_type}/test{args.fold}.txt", "r").readlines())
 
