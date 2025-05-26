@@ -11,6 +11,19 @@ BiocManager::install("biomaRt")
 library(biomaRt)
 library(seqinr)
 
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+cleanSeq <- function(x){
+	last_flag <- substrRight(x, 1)
+	if(last_flag == "*"){
+		slen <- nchar(x)-1
+		x <- substr(x, 1, slen)
+	}
+	return(x)
+}
+
 # download GTF file from Ensembl
 # downloaded 25.04.2024
 #########################################################
