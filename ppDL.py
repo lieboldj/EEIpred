@@ -116,16 +116,20 @@ class BinaryMatrixClassifier(nn.Module):
 
 #%%
 # path to exons
-if optn.method == "ProteinMAE":
-    root_path = "../ProteinMAE/search"
+if optn.method == "dMaSIF":
+    root_path = "dmasif"
+elif optn.method == "GLINTER":
+    root_path = "glinter"
+elif optn.method == "ProteinMAE":
+    root_path = "ProteinMAE/search"
 else:
     root_path = optn.method
 save_path = "ppDL_models/{}/{}/".format(optn.method, optn.dataset)
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
-if len(optn.dataset.split("_")) > 1:
-    dataset = optn.dataset.split("_")[1]
+if len(optn.dataset.split("_")) > 2:
+    dataset = optn.dataset.split("_")[1] + "_" + optn.dataset.split("_")[2]
 else:
     dataset = optn.dataset
 exon_labels = "data_collection/cv_splits/{}/{}_positives.txt".format(dataset, dataset)
@@ -142,7 +146,11 @@ if optn.mode == "train":
         train_data = glob.glob(train_folder + "*.npy")
         train_data = [x for x in train_data if "big.npy" not in x]
 
-        train_data, val_data = train_test_split(train_data, test_size=optn.train_val, random_state=optn.seed)
+        val_folder = "{}/results/{}/fold{}/{}/".format(root_path, optn.dataset, cv_idx,"val")
+        val_data = glob.glob(val_folder + "*.npy")
+        val_data = [x for x in val_data if "big.npy" not in x]
+
+        #train_data, val_data = train_test_split(train_data, test_size=optn.train_val, random_state=optn.seed)
 
         # create datasets
         trainDataset = ExonDataset(train_data, filename = exon_labels)
@@ -302,12 +310,22 @@ if optn.mode == "test":
         # uncomment to result files for creating plots
         if optn.method == "dmasif":
             optn.method = "dMaSIF"
+        elif optn.method == "glinter":
+            optn.method = "GLINTER"
 
         if optn.eval_modus == "test_set":
-            np.save("results/{}_DL/{}_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-            np.save("results/{}_DL/{}_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+            np.save("results/{}_DL/{}_test_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+            np.save("results/{}_DL/{}_test_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
         elif optn.eval_modus == "train_set":
-            np.save("results/{}_DL/{}_backPOS_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-            np.save("results/{}_DL/{}_back_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+            np.save("results/{}_DL/{}_train_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+            np.save("results/{}_DL/{}_train_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        elif optn.eval_modus == "val_set":
+            np.save("results/{}_DL/{}_val_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+            np.save("results/{}_DL/{}_val_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+
+        if optn.method == "dMaSIF":
+            optn.method = "dmasif"
+        elif optn.method == "GLINTER":
+            optn.method = "glinter"
 
 # %%

@@ -11,8 +11,21 @@ if __name__ == "__main__":
     method = sys.argv[3] #"dmasif, PInet, glinter"
     folds = sys.argv[4] #[1,2,3,4,5]" for all folds
     #method_path = "../ProteinMAE/search/"
-    method_path = "dmasif"
+
+    if method == "dMaSIF":
+        method_path = "dmasif"
+    elif method == "GLINTER":
+        method_path = "glinter"
+    elif method == "ProteinMAE":
+        method_path = "ProteinMAE/search"
+    else:
+        method_path = method
+    #method_path = "dmasif"
     path_to_data = "data_collection/cv_splits/"
+    pre_trained = ""
+    if "pretrained" in dataset:
+        pre_trained = "pretrained_"
+        dataset = dataset.replace("pretrained_", "")
 
     filename_pos = path_to_data + "{}/{}_positives.txt".format(dataset.split('_')[1], dataset.split('_')[1])
     df_pos = pd.read_csv(filename_pos, sep='\t')
@@ -22,7 +35,7 @@ if __name__ == "__main__":
         print("Fold: ",i)
         inter_exons = []
         non_inter_exons = []
-        all_exons = glob.glob("{}/results/{}/fold{}/{}/*".format(method_path, dataset,i,mode))
+        all_exons = glob.glob("{}/results/{}{}/fold{}/{}/*".format(method_path, pre_trained, dataset,i,mode))
         all_exons = sorted(all_exons)
 
         for exon_pair_full in tqdm(all_exons):
@@ -58,26 +71,28 @@ if __name__ == "__main__":
                 if exon.shape[0] > 100 or exon.shape[1] > 100:
                     continue
                 non_inter_exons.append(np.max(exon))
-        
+
         if method == "dmasif":
-            if not os.path.exists("results/dMaSIF_Max/"):
-                os.makedirs("results/dMaSIF_Max/")
-            if mode == "test":
-                np.save("results/dMaSIF_Max/{}_pos_fold{}.npy".format(dataset,i), inter_exons)
-                np.save("results/dMaSIF_Max/{}_neg_fold{}.npy".format(dataset,i), non_inter_exons)
-            else:
-                np.save("results/dMaSIF_Max/{}_backPOS_fold{}.npy".format(dataset, i), inter_exons)
-                np.save("results/dMaSIF_Max/{}_back_fold{}.npy".format(dataset, i), non_inter_exons)
+            method = "dMaSIF"
+        elif method == "glinter":
+            method = "GLINTER"
+
+        if not os.path.exists("results/{}_Max/".format(method)):
+            os.makedirs("results/{}_Max/".format(method))
+
+        if mode == "test":
+            np.save("results/{}_Max/{}_test_pos_fold{}.npy".format(method,dataset,i), inter_exons)
+            np.save("results/{}_Max/{}_test_neg_fold{}.npy".format(method,dataset,i), non_inter_exons)
+        elif mode == "val":
+            np.save("results/{}_Max/{}_val_pos_fold{}.npy".format(method, dataset, i), inter_exons)
+            np.save("results/{}_Max/{}_val_neg_fold{}.npy".format(method, dataset, i), non_inter_exons)
         else:
-            if not os.path.exists("results/{}_Max/".format(method)):
-                os.makedirs("results/{}_Max/".format(method))
-
-            if mode == "test":
-                np.save("results/{}_Max/{}_pos_fold{}.npy".format(method,dataset,i), inter_exons)
-                np.save("results/{}_Max/{}_neg_fold{}.npy".format(method,dataset,i), non_inter_exons)
-            else:
-                np.save("results/{}_Max/{}_backPOS_fold{}.npy".format(method, dataset, i), inter_exons)
-                np.save("results/{}_Max/{}_back_fold{}.npy".format(method,dataset, i), non_inter_exons)
-
+            np.save("results/{}_Max/{}_train_pos_fold{}.npy".format(method, dataset, i), inter_exons)
+            np.save("results/{}_Max/{}_train_neg_fold{}.npy".format(method,dataset, i), non_inter_exons)
+        
+        if method == "dMaSIF":
+            method = "dmasif"
+        elif method == "GLINTER":
+            method = "glinter"
         print("inter_exons: ", len(inter_exons))
         print("non_inter_exons: ", len(non_inter_exons))

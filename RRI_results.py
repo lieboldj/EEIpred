@@ -24,9 +24,9 @@ if __name__ == "__main__":
     path_to_data = "data_collection/cv_splits/"
     #rr_cutoff = 4
     pre_trained = ""
-    if "pre" in dataset:
-        pre_trained = "pre_"
-        dataset = dataset.replace("pre_", "")
+    if "pretrained" in dataset:
+        pre_trained = "pretrained_"
+        dataset = dataset.replace("pretrained_", "")
 
     filename_pos = path_to_data + "{}/{}_positives.txt".format(dataset, dataset)
     filename_neg = path_to_data + "{}/{}_negatives.txt".format(dataset, dataset)
@@ -36,23 +36,40 @@ if __name__ == "__main__":
 
     mode = sys.argv[2] #"train, test"
     method = sys.argv[3] #"dMaSIF, PInet, glinter" ProteinMAE
-    if len(sys.argv) > 5:
-        method_path = sys.argv[5] #"dmasif, PInet, glinter" ../ProteinMAE/search
-    elif method == "dMaSIF":
+    #if len(sys.argv) > 5:
+    #    method_path = sys.argv[6] #"dmasif, PInet, glinter" ../ProteinMAE/search
+    if method == "dMaSIF":
         method_path = "dmasif"
     elif method == "GLINTER":
         method_path = "glinter"
+    elif method == "ProteinMAE":
+        method_path = "ProteinMAE/search"
     else:
         method_path = method
+
+    cutoff = int(sys.argv[5]) #4, 6, 8
     folds = sys.argv[4] #[1,2,3,4,5]" for all folds
-    df_aa = pd.read_csv("data_collection/aa_interactions6_24-01-04.txt", sep='\t')
     
+    if cutoff == 6:
+        df_aa = pd.read_csv("data_collection/aa_interactions6_24-01-04.txt", sep='\t')
+    elif cutoff == 4:
+        df_aa = pd.read_csv("data_collection/aa_interactions4.txt", sep='\t')
+    elif cutoff == 8:
+        df_aa = pd.read_csv("data_collection/aa_interactions8.txt", sep='\t')
+    else:
+        print(f"cutoff {cutoff} not supported, we take default cutoff = 6")
+        df_aa = pd.read_csv("data_collection/aa_interactions6_24-01-04.txt", sep='\t')
+        cutoff = 6
     #df_aa = pd.read_csv(f"data_collection/aa_interactions{rr_cutoff}.txt", sep='\t')
     #split folds at ,
     folds = folds.split(",")
     for i in folds:
-        df_test = pd.read_csv(path_to_data + "{}/{}{}.txt".format(dataset, mode, i), sep='_', header=None)
-        df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}.txt".format(dataset, mode, i), sep='\t', header=None)
+        if method != "GLINTER":
+            df_test = pd.read_csv(path_to_data + "{}/{}{}.txt".format(dataset, mode, i), sep='_', header=None)
+            df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}.txt".format(dataset, mode, i), sep='\t', header=None)
+        else:
+            df_test = pd.read_csv(path_to_data + "{}/{}{}_glinter.txt".format(dataset, mode, i), sep='_', header=None)
+            df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}_glinter.txt".format(dataset, mode, i), sep='\t', header=None)
         df_test.columns = ['PDB', 'Chain1', 'Chain2']
         df_testinfo.columns = ['UniProt1', 'UniProt2']
         exon_pair_counter = 0
@@ -162,14 +179,31 @@ if __name__ == "__main__":
         # make dir if not exists
         if method == "dmasif":
             method = "dMaSIF"
-        if not os.path.exists(f"results/{method}_AA/"):
-            os.makedirs(f"results/{method}_AA/")
-        if mode == "test":
-            np.save("results/{}_AA/{}{}_pos_fold{}.npy".format(method,pre_trained,dataset, i), inter_aa)
-            np.save("results/{}_AA/{}{}_neg_fold{}.npy".format(method,pre_trained,dataset, i), not_inter_aa)
-        if mode == "train":
-            np.save("results/{}_AA/{}{}_back_fold{}.npy".format(method,pre_trained,dataset, i), not_inter_aa)
-            np.save("results/{}_AA/{}{}_backPOS_fold{}.npy".format(method,pre_trained,dataset, i), inter_aa)
-                    # get the indices of the residues in the exon
+        if cutoff == 6:
+            if not os.path.exists(f"results/{method}_AA/"):
+                os.makedirs(f"results/{method}_AA/")
+            if mode == "test":
+                np.save("results/{}_AA/{}{}_test_pos_fold{}.npy".format(method,pre_trained,dataset, i), inter_aa)
+                np.save("results/{}_AA/{}{}_test_neg_fold{}.npy".format(method,pre_trained,dataset, i), not_inter_aa)
+            if mode == "train":
+                np.save("results/{}_AA/{}{}_train_neg_fold{}.npy".format(method,pre_trained,dataset, i), not_inter_aa)
+                np.save("results/{}_AA/{}{}_train_pos_fold{}.npy".format(method,pre_trained,dataset, i), inter_aa)
+                        # get the indices of the residues in the exon
+            if mode == "val":
+                np.save("results/{}_AA/{}{}_val_neg_fold{}.npy".format(method,pre_trained,dataset, i), not_inter_aa)
+                np.save("results/{}_AA/{}{}_val_pos_fold{}.npy".format(method,pre_trained,dataset, i), inter_aa)
+        else:
+            if not os.path.exists(f"results/{method}_AA_{cutoff}/"):
+                os.makedirs(f"results/{method}_AA_{cutoff}/")
+            if mode == "test":
+                np.save("results/{}_AA_{}/{}{}_test_pos_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), inter_aa)
+                np.save("results/{}_AA_{}/{}{}_test_neg_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), not_inter_aa)
+            if mode == "train":
+                np.save("results/{}_AA_{}/{}{}_train_neg_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), not_inter_aa)
+                np.save("results/{}_AA_{}/{}{}_train_pos_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), inter_aa)
+                        # get the indices of the residues in the exon
+            if mode == "val":
+                np.save("results/{}_AA_{}/{}{}_val_neg_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), not_inter_aa)
+                np.save("results/{}_AA_{}/{}{}_val_pos_fold{}.npy".format(method,cutoff,pre_trained,dataset, i), inter_aa)
         if method == "dMaSIF":
             method = "dmasif"
