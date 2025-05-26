@@ -136,6 +136,7 @@ def iterate_protmae(
     pdb_dir=None,
     dataset_name=None,
     mode="test",
+    datatype="pdb"
 ):
     """Goes through one epoch of the dataset, returns information for Tensorboard."""
 
@@ -278,21 +279,37 @@ def iterate_protmae(
 
             # save P1 and P2 as npy files but keeping the dict format. 
             # create dir if not existing
-            if not os.path.exists(f"../data_collection/processed_dmasif/runtime/"):
-                os.makedirs(f"../data_collection/processed_dmasif/runtime/")
-            np.savez(f"../data_collection/processed_dmasif/runtime/{batch_ids[protein_it]}.npz", **protein_pair_dict)
-
+            
 
             # save as npy files
+            ######## FOR PDBs ##########
             # extract chain info from batch_ids
-            chain1 = batch_ids[protein_it].split("_")[1]
-            chain2 = batch_ids[protein_it].split("_")[2]
-            base = batch_ids[protein_it].split("_")[0]
-            
-            if not os.path.exists(f"../data_collection/processed_dmasif/runtime/"):
-                os.makedirs(f"../data_collection/processed_dmasif/runtime/")
-            np.savez(f"../data_collection/processed_dmasif/runtime/{base}_{chain1}.npz", **prot_dict1)
-            np.savez(f"../data_collection/processed_dmasif/runtime/{base}_{chain2}.npz", **prot_dict2)
+            if datatype == "pdb":
+                if not os.path.exists(f"../data_collection/processed_dmasif/pairs/"):
+                    os.makedirs(f"../data_collection/processed_dmasif/pairs/")
+                np.savez(f"../data_collection/processed_dmasif/pairs/{batch_ids[protein_it]}.npz", **protein_pair_dict)
+
+                chain1 = batch_ids[protein_it].split("_")[1]
+                chain2 = batch_ids[protein_it].split("_")[2]
+                base = batch_ids[protein_it].split("_")[0]
+
+                if not os.path.exists(f"../data_collection/processed_dmasif/single/"):
+                    os.makedirs(f"../data_collection/processed_dmasif/single/")
+                
+                np.savez(f"../data_collection/processed_dmasif/single/{base}_{chain1}.npz", **prot_dict1)
+                np.savez(f"../data_collection/processed_dmasif/single/{base}_{chain2}.npz", **prot_dict2)
+            ######## FOR ALPHAFOLD ##########
+            if datatype == "alphafold":
+                if not os.path.exists(f"../data_collection/processed_dmasif/alphafold_pairs/"):
+                    os.makedirs(f"../data_collection/processed_dmasif/alphafold_pairs/")
+                np.savez(f"../data_collection/processed_dmasif/alphafold_pairs/{batch_ids[protein_it]}.npz", **protein_pair_dict)
+
+                chain1 = batch_ids[protein_it].split("\t")[0]
+                chain2 = batch_ids[protein_it].split("\t")[1]
+
+                np.savez(f"../data_collection/processed_dmasif/alphafold/{chain1}.npz", **prot_dict1)
+                np.savez(f"../data_collection/processed_dmasif/alphafold/{chain2}.npz", **prot_dict2)
+
             #print(batch_ids[protein_it], time.time() - per_pair_start)
 
 
