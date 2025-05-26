@@ -182,3 +182,10 @@ parser.add_argument(
     help="True if we want to only run the pre-prosessing of the point clouds \
         for ProteinMAE, default: False",
 )
+
+parser.add_argument(
+    "--mode",
+    type=str,
+    default="test",
+    help="choose between test, val, and train.",
+)

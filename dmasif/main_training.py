@@ -37,9 +37,33 @@ net = net.to(args.device)
 
 # PyTorch geometric expects an explicit list of "batched variables":
 batch_vars = ["xyz_p1", "xyz_p2", "atom_coords_p1", "atom_coords_p2"]
+
+# Load validation dataset:
+val_dataset = ProteinPairsSurfaces(
+    f"surface_data{args.train_no}", fold=args.train_no, split="val", transform=None
+)
+
+val_pdb_ids = np.load(f"surface_data{args.train_no}/processed/validation_pairs_data_ids_ppi.npy")
+val_loader = DataLoader(
+    val_dataset, batch_size=1, follow_batch=batch_vars, shuffle=True
+)
+print("Preprocessing validation dataset")
+val_dataset = iterate_surface_precompute(val_loader, net, args)
+
+# Load the test dataset:
+test_dataset = ProteinPairsSurfaces(
+    f"surface_data{args.train_no}", fold=args.train_no, split="test", transform=None
+)
+test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/testing_pairs_data_ids_ppi.npy")
+test_loader = DataLoader(
+    test_dataset, batch_size=1, follow_batch=batch_vars, shuffle=True
+)
+print("Preprocessing testing dataset")
+test_dataset = iterate_surface_precompute(test_loader, net, args)
+
 # Load the train dataset:
 train_dataset = ProteinPairsSurfaces(
-    f"surface_data{args.train_no}", ppi=args.train_no, train=True, transform=None
+    f"surface_data{args.train_no}", fold=args.train_no, split="train", transform=None
 )
 
 #train_dataset = [data for data in train_dataset if iface_valid_filter(data)]
@@ -49,29 +73,7 @@ train_loader = DataLoader(
 print("Preprocessing training dataset")
 train_dataset = iterate_surface_precompute(train_loader, net, args)
 
-train_val_pdb_ids = np.load(f"surface_data{args.train_no}/processed/training_pairs_data_ids_ppi.npy")
-# Train/Validation split:
-train_nsamples = len(train_dataset)
-val_nsamples = int(train_nsamples * args.validation_fraction)
-train_nsamples = train_nsamples - val_nsamples
-train_dataset, val_dataset = random_split(
-    train_dataset, [train_nsamples, val_nsamples]
-)
-train_pdb_ids, val_pdb_ids = random_split(
-    train_val_pdb_ids, [train_nsamples, val_nsamples]
-)
-
-# Load the test dataset:
-test_dataset = ProteinPairsSurfaces(
-    f"surface_data{args.train_no}", ppi=args.train_no, train=False, transform=None
-)
-test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/testing_pairs_data_ids_ppi.npy")
-test_loader = DataLoader(
-    test_dataset, batch_size=1, follow_batch=batch_vars, shuffle=True
-)
-print("Preprocessing testing dataset")
-test_dataset = iterate_surface_precompute(test_loader, net, args)
-
+train_pdb_ids = np.load(f"surface_data{args.train_no}/processed/training_pairs_data_ids_ppi.npy")
 
 # PyTorch_geometric data loaders:
 train_loader = DataLoader(

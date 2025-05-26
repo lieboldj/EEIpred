@@ -22,16 +22,12 @@ import shutil
 ##############################################################################
 # mode is test, change to train for background model
 ##############################################################################
-mode = "test"
-if mode == "test":
-    b_mode = False
-else:
-    b_mode = True
 
 args = parser.parse_args()
 model_path = "models/" + args.experiment_name
 save_predictions_path = Path("preds/" + args.experiment_name)
 
+mode = args.mode
 if not os.path.exists(f"surface_data{args.train_no}"):
     os.makedirs(f"surface_data{args.train_no}")
 
@@ -63,10 +59,13 @@ else:
     #change train to true for background model#
     ###############################
     test_dataset = ProteinPairsSurfaces(
-        f"surface_data{args.train_no}", ppi=args.train_no, train=b_mode, transform=None
+        f"surface_data{args.train_no}", fold=args.train_no, split=mode, transform=None
     )
     # change TRAIN TEST HERE
-    test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/{mode}ing_pairs_data_ids_ppi.npy")
+    if mode == "val":
+        test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/{mode}idation_pairs_data_ids_ppi.npy")
+    else:
+        test_pdb_ids = np.load(f"surface_data{args.train_no}/processed/{mode}ing_pairs_data_ids_ppi.npy") # idation for validation, ing for testing/training
 
 # PyTorch geometric expects an explicit list of "batched variables":
 batch_vars = ["xyz_p1", "xyz_p2", "atom_coords_p1", "atom_coords_p2"]
@@ -87,6 +86,7 @@ lists_dir = Path("../data_collection/cv_splits/")
 # change path to your pdb files including hydrogen atoms
 ##############################################################################
 pdb_dir = Path("surface_data/raw/01-benchmark_pdbs/")
+#pdb_dir = Path("surface_data/raw/01-af_pdbs/")
 dataset_name = args.experiment_name.split("/")[0]
 # load files ones
 # change TRAIN TEST HERE
@@ -126,6 +126,7 @@ else:
         pdb_dir=pdb_dir,
         dataset_name=args.experiment_name.split("/")[0],
         mode=mode,
+        datatype="alphafold" #, if you preprocess the data with alphafold
     )
 
 # remove the processed files to process different datasets

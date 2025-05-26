@@ -228,9 +228,12 @@ class PairData(Data):
 
 def load_protein_pair(pdb_id, data_dir,single_pdb=True):
     """Loads a protein surface mesh and its features"""
-    pspl = pdb_id.split("_")
-    p1_id = pspl[0] + "_" + pspl[1]
-    p2_id = pspl[0] + "_" + pspl[2]
+    pspl = pdb_id.split("\t")
+    #p1_id = pspl[0] + "_" + pspl[1]
+    #p2_id = pspl[0] + "_" + pspl[2]
+
+    p1_id = pspl[0]
+    p2_id = pspl[1]
 
     p1 = load_protein_npy(p1_id, data_dir, center=False,single_pdb=single_pdb)
     p2 = load_protein_npy(p2_id, data_dir, center=False,single_pdb=single_pdb)
@@ -247,33 +250,42 @@ def load_protein_pair(pdb_id, data_dir,single_pdb=True):
 class ProteinPairsSurfaces(InMemoryDataset):
     url = ""
 
-    def __init__(self, root, ppi=1, train=True, transform=None, pre_transform=None):
-        self.ppi = ppi
+    def __init__(self, root, fold=1, split='train', transform=None, pre_transform=None):
+        self.fold = fold
+        self.split = split.lower()
         super(ProteinPairsSurfaces, self).__init__(root, transform, pre_transform)
-        path = self.processed_paths[0] if train else self.processed_paths[1]
+        split_to_index = {'train': 0, 'test': 2, 'val': 1}
+        if self.split not in split_to_index:
+            raise ValueError(f"Invalid split: {split}. Expected one of 'train', 'test', or 'val'.")
+        
+        path = self.processed_paths[split_to_index[self.split]]
+        #path = self.processed_paths[0] if train else self.processed_paths[1]
         self.data, self.slices = torch.load(path)
 
     @property
     def processed_file_names(self):
         file_names = [
             "training_pairs_data_ppi.pt",
+            "validation_pairs_data_ppi.pt",
             "testing_pairs_data_ppi.pt",
             "training_pairs_data_ids_ppi.npy",
-            "testing_pairs_data_ids_ppi.npy",
+            "testing_pairs_data_ids_ppi.npy",    
+            "validation_pairs_data_ids_ppi.npy",
         ]
         return file_names
 
 
     def process(self):
-        fold_no = self.ppi
+        fold_no = self.fold
         print(fold_no)
         pdb_dir = Path("surface_data") / "raw" / "01-benchmark_pdbs"
         #surf_dir = Path(self.root) / "raw" / "01-benchmark_surfaces"
-        protein_dir = Path("surface_data") / "raw" / "01-benchmark_surfaces_npy"
+        #protein_dir = Path("surface_data") / "raw" / "01-benchmark_surfaces_npy"
+        protein_dir = Path("surface_data") / "raw" / "01-af_npys"
         
         ##################change THIS LINE PER DATASET##################
         
-        lists_dir = Path('../data_collection/cv_splits/EXAMPLE') 
+        lists_dir = Path('../data_collection/cv_splits/BioGRID') 
 
         if not protein_dir.exists():
             protein_dir.mkdir(parents=False, exist_ok=False)
@@ -281,10 +293,11 @@ class ProteinPairsSurfaces(InMemoryDataset):
 
         with open(lists_dir / f"train{fold_no}.txt") as f_tr, open(
             lists_dir / f"test{fold_no}.txt"
-        ) as f_ts:
+        ) as f_ts, open(lists_dir / f"val{fold_no}.txt") as f_val:
             training_pairs_list = f_tr.read().splitlines()
             testing_pairs_list = f_ts.read().splitlines()
-            pairs_list = training_pairs_list + testing_pairs_list
+            validation_pairs_list = f_val.read().splitlines()
+            pairs_list = training_pairs_list + testing_pairs_list + validation_pairs_list
 
         # # Read data into huge `Data` list.
         training_pairs_data = []
@@ -307,12 +320,25 @@ class ProteinPairsSurfaces(InMemoryDataset):
             testing_pairs_data.append(protein_pair)
             testing_pairs_data_ids.append(p)
 
+        validation_pairs_data = []
+        validation_pairs_data_ids = []
+        for p in validation_pairs_list:
+            try:
+                protein_pair = load_protein_pair(p, protein_dir)
+            except FileNotFoundError:
+                continue
+            validation_pairs_data.append(protein_pair)
+            validation_pairs_data_ids.append(p)
+
         if self.pre_filter is not None:
             training_pairs_data = [
                 data for data in training_pairs_data if self.pre_filter(data)
             ]
             testing_pairs_data = [
                 data for data in testing_pairs_data if self.pre_filter(data)
+            ]
+            validation_pairs_data = [
+                data for data in validation_pairs_data if self.pre_filter(data)
             ]
 
         if self.pre_transform is not None:
@@ -321,6 +347,9 @@ class ProteinPairsSurfaces(InMemoryDataset):
             ]
             testing_pairs_data = [
                 self.pre_transform(data) for data in testing_pairs_data
+            ]
+            validation_pairs_data = [
+                self.pre_transform(data) for data in validation_pairs_data
             ]
 
         training_pairs_data, training_pairs_slices = self.collate(training_pairs_data)
@@ -331,3 +360,7 @@ class ProteinPairsSurfaces(InMemoryDataset):
         testing_pairs_data, testing_pairs_slices = self.collate(testing_pairs_data)
         torch.save((testing_pairs_data, testing_pairs_slices), f"surface_data{fold_no}/processed/testing_pairs_data_ppi.pt")
         np.save(f"surface_data{fold_no}/processed/testing_pairs_data_ids_ppi.npy", testing_pairs_data_ids)
+
+        validation_pairs_data, validation_pairs_slices = self.collate(validation_pairs_data)
+        torch.save((validation_pairs_data, validation_pairs_slices), f"surface_data{fold_no}/processed/validation_pairs_data_ppi.pt")
+        np.save(f"surface_data{fold_no}/processed/validation_pairs_data_ids_ppi.npy", validation_pairs_data_ids)
