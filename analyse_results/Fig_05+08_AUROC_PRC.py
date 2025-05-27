@@ -191,8 +191,8 @@ data = dict()
 use_all = True 
 # if there is CLUST in dataset names
 if "CLUST" in datasets[0]:
-    if os.path.exists(f"../results/plots/all_clust{alphas[0]}_4.npy") and use_all:
-        data = np.load(f"../results/plots/all_clust{alphas[0]}_4.npy", allow_pickle=True).item()  
+    if os.path.exists(f"../results/plots/all_clust{alphas[0]}.npy") and use_all:
+        data = np.load(f"../results/plots/all_clust{alphas[0]}.npy", allow_pickle=True).item()  
 else:
     if os.path.exists(f"../results/plots/all_{alphas[0]}.npy") and use_all:
         data = np.load(f"../results/plots/all_{alphas[0]}.npy", allow_pickle=True).item()
