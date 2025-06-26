@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # URL of the zip file to download
-url_data="https://figshare.com/ndownloader/files/45074818"
-url_pretrained="https://figshare.com/ndownloader/files/51580901"
-url_data_for_plots="added later"
+url_data="https://figshare.com/ndownloader/files/55611968"
+url_pretrained="https://figshare.com/ndownloader/files/55611941"
+url_data_for_plots="https://figshare.com/ndownloader/files/55699016"
 
 # Directory to download the zip file into best here, same download_sup_data.sh
 download_dir="."
