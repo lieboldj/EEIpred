@@ -101,3 +101,4 @@ mv $download_dir/pre-trained/ProteinMAE/TS_32_* $download_dir/ProteinMAE/search/
 # remove the pre-trained models folder and datasets folder
 rm -r "$download_dir/pre-trained"
 rm -r "$download_dir/dataset"
+rm -r "$download_dir/data_for_plots"

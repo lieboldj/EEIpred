@@ -4,6 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score, average_precision_score
 
+# pick the dataset you want to plot, switch to CLUST_EPPIC or CLUST_CONTACT for further analysis
+# set -p to AA for RRI and to DL for EEI using PPDL
+pick_dataset = "CLUST_CONTACT"
+
 # Given functions
 def precision(TP, FP):
     return TP / (TP + FP)
@@ -49,7 +53,7 @@ datasets = args.dataset.split(",")
 sampling_on = args.sampling
 auroc_on = args.auroc
 evals = ["Precision", "Recall", "Fscore", "MCC"]
-pick_dataset = "CLUST_EPPIC"
+
 get_index_dataset = datasets.index(pick_dataset)
 
 font_size = 16
@@ -165,20 +169,10 @@ ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 ax.set_xlabel('False Discovery Rate (FDR)', fontsize=font_size)
 ax.set_ylabel('Number of performance tests', fontsize=font_size)
 
-# Add a legend
-#ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.55, 0.1))
 
-plt.tight_layout()
-#Save figure
-#plt.savefig(f'{pps[0]}_ranked_ECCB.png', dpi=600)
-
-# create bar plots with error bar for Fscore only but the 5 different thresholds
-# take the mean over the last dimension and get the standard deviation over the last dimension
-# Step 2: Calculate the mean and standard deviation of the F-scores.
 mean_fscore = np.nanmean(ranked_results, axis=4)
 std_fscore = np.nanstd(ranked_results, axis=4)
 
-# Step 3: Plot the results.
 fig, ax = plt.subplots()
 
 # Select the relevant data
@@ -186,21 +180,10 @@ x_ticks = np.arange(mean_fscore.shape[0])  # dim0
 
 mean_values_0 = mean_fscore[:, :, get_index_dataset, 2]    #slast dim: 2 = Fscore, 1 = Recall, 0 = Precision, 3 = MCC
 std_values_0 = std_fscore[:, :, get_index_dataset, 2]      # same here
-# 5 thresholds, 4 methods, 3 datasets, 4 metrics, 5 test sets
-#evals = ["Precision", "Recall", "Fscore", "MCC"]
+
 # Bar Width to fit 5 bars in one group
 bar_width = 0.2
 
-# Plotting the bars with height mean and error bars with std
-#for i in range(mean_values_0.shape[1]):
-#    ax.bar(
-#        x_ticks + i * bar_width, 
-#        mean_values_0[:, i], 
-#        bar_width, 
-#        yerr=std_values_0[:, i], 
-#        label=methods[i], 
-#        color=colors[i]
-#    )
 for i in range(mean_values_0.shape[1]):  # methods
     bar_positions = x_ticks + i * bar_width
     ax.bar(
@@ -216,17 +199,7 @@ for i in range(mean_values_0.shape[1]):  # methods
     for j in range(mean_values_0.shape[0]):  # thresholds
         # Get individual values (5 test sets)
         data_points = ranked_results[j, i, get_index_dataset, 2, :]  # shape: (5,)
-        
-        # Jitter for individual points so they don't overlap
-        #jitter = (np.random.rand(len(data_points)) - 0.5) * bar_width * 0.6
-        # ax.scatter(
-        #     np.full_like(data_points, bar_positions[j]),# + jitter,
-        #     data_points,
-        #     color=colors[i],
-        #     s=20,
-        #     alpha=1,
-        #     edgecolor='black'
-        # )
+
         jitter = np.linspace(-bar_width / 4, bar_width / 4, len(data_points))
         ax.scatter(jitter + bar_positions[j],
                    data_points,
@@ -244,10 +217,17 @@ ax.set_ylabel('F-score', fontsize=font_size)
 
 ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 
-# Add a legend
-#ax.legend(ncol=2, loc='lower center', fontsize=font_size, bbox_to_anchor=(0.5, -0.02))
-#plt.title(f'{pps[0]} - {pick_dataset} - F-score', fontsize=font_size)
+
 plt.tight_layout()
 # Save the figure
-print(f'{pps[0]}_{pick_dataset}_fscore_color.png')
-plt.savefig(f'{pps[0]}_{pick_dataset}_fscore_color.png', dpi=300)
+if args.pp == "DL":
+    if pick_dataset == "CLUST_CONTACT":
+        plt.savefig(f'Fig09_{pick_dataset}.png', dpi=600)
+    else:
+        plt.savefig(f'FigS9_{pick_dataset}.png', dpi=600)
+elif args.pp == "AA":
+    if pick_dataset == "CLUST_PISA":
+        plt.savefig(f'Fig06_{pick_dataset}.png', dpi=600)
+    else:
+        plt.savefig(f'FigS6_{pick_dataset}.png', dpi=600)
+

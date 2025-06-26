@@ -1,5 +1,5 @@
 import numpy as np
-
+# pos/back are predicted scores and not available in this repository run PPDL with the pre-trained models 
 pos = np.load("../results/dMaSIF_DL/CLUST_CONTACT_test_pos_fold1.npy")
 back = np.load("../results/dMaSIF_DL/CLUST_CONTACT_train_neg_fold1.npy")
 
