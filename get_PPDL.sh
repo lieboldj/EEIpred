@@ -2,10 +2,10 @@
 
 # example usage:
 # train to save model parameters, test to predict given the pre-trained model
-# ./get_PPDL_train.sh dmasif train
-# ./get_PPDL_train.sh ProteinMAE test
-# ./get_PPDL_train.sh PInet test
-# ./get_PPDL_train.sh GLINTER train
+# ./get_PPDL.sh dmasif train
+# ./get_PPDL.sh ProteinMAE test
+# ./get_PPDL.sh PInet test
+# ./get_PPDL.sh GLINTER train
 
 datasets=(CLUST_CONTACT CLUST_EPPIC CLUST_PISA)
 method=$1

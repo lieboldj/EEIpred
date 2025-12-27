@@ -8,13 +8,13 @@ from matplotlib_venn import venn3
 import matplotlib
 import os
 
-save_non_int_exon = True
+save_non_int_exon = False
 load_from_file = True
 
 datasets = ["CONTACT", "PISA", "EPPIC"]
 datasets = ["CLUST_CONTACT", "CLUST_PISA", "CLUST_EPPIC"]
 exon = True
-ppair = False
+ppair = True
 
 if load_from_file:
     if exon:
@@ -149,24 +149,27 @@ if save_non_int_exon:
 else:
     out = venn3([dict_int_exons[datasets[2]], dict_int_exons[datasets[1]], dict_int_exons[datasets[0]]], ("$D_{Evol}$", "$D_{Engy}$", "$D_{Con}$"))
 for text in out.set_labels:
-    text.set_fontsize(16)
+    text.set_fontsize(20)
         # set bold
     text.set_fontweight('bold')
 for text in out.subset_labels:
-    text.set_fontsize(10)
+    text.set_fontsize(18)
 #plt.title('Interacting Exon Pairs')
 plt.tight_layout()
 if ppair:
     if "CLUST" in datasets[0]:
         plt.savefig('Fig3_venn_ppairs.png', dpi=600)
+        plt.savefig('Fig3a.pdf')
     else:
         plt.savefig('FigS3_venn_ppairs.png', dpi=600)
 if exon: 
     if "CLUST" in datasets[0]:
         if save_non_int_exon:
             plt.savefig('Fig3_venn_exons_non_int.png', dpi=600)
+            plt.savefig('Fig3_venn_exons_non_int.pdf')
         else: 
             plt.savefig('Fig3_venn_exons_int.png', dpi=600)
+            plt.savefig('Fig3_venn_exons_int.pdf')
     else:
         if save_non_int_exon:
             plt.savefig('FigS3_venn_exons_non_int.png', dpi=600)

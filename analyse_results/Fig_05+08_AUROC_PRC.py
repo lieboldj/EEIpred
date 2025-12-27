@@ -18,7 +18,7 @@ parser.add_argument('-mh', '--method', type=str, default="dMaSIF,PInet,GLINTER,P
 parser.add_argument('-p', '--pp', type=str, default="AA", help='Preprocessings to test')
 parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=int, default=0, help='Sampling on or off, is recommanded for AUROC')
-parser.add_argument('-mr','--metric', type=str, default="AUPRC", help='Metric to plot, choose between AUPRC or AUROC')
+parser.add_argument('-mr','--metric', type=str, default="AUROC", help='Metric to plot, choose between AUPRC or AUROC')
 parser.add_argument('-a','--alpha', type=float, default=0.05, help='Threshold for precision and recall')
 parser.add_argument('-c','--conf_matrix', type=int, default=0, help='Confusion matrix')
 parser.add_argument('-csv','--csv', type=int, default=0, help='Create csv file with all results')
@@ -361,7 +361,7 @@ pp = pps[0]
 data = {key: value for key, value in data.items() if pp in key}
 
 #print(data)
-font_size = 16
+font_size = 18
 
 fig, ax = plt.subplots()
 bar_width = 0.1
@@ -441,7 +441,7 @@ if "ProteinMAE" in methods and not "pretrained" in methods:
     data_dicts["ProtMAE"] = proteinmae_grouped_data
 
     # add x_ticks_labels
-    x_ticks_labels.append("ProteinMAE")
+    x_ticks_labels.append("   ProteinMAE")
 
 number_tools = len(methods)
 
@@ -464,9 +464,11 @@ else:
 ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 # Add legend
 legend_labels = ["$D_{Con}$", "$D_{Engy}$", "$D_{Evol}$"]
-if args.metric == "AUPRC":
-    ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
+#if args.metric == "AUPRC":
+#    ax.legend(legend_labels, loc='lower center', ncol=3, fontsize=font_size, bbox_to_anchor=(0.5, -0.5))
 #else:
 #    ax.legend(legend_labels, loc='lower center', ncol=1, fontsize=font_size, bbox_to_anchor=(1.15, 0.67))
-plt.savefig(f"CLUST_{pp}_{metric_string}_results_color.png", dpi=600, bbox_inches='tight')
+plt.savefig(f"Fig5a.png", dpi=600, bbox_inches='tight')
+plt.tight_layout()
+plt.savefig(f"Fig5a.pdf")
 

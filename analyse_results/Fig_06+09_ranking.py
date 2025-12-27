@@ -18,7 +18,7 @@ sampling_on = args.sampling
 auroc_on = args.auroc
 evals = ["Precision", "Recall", "Fscore", "MCC"]
 
-font_size = 16
+font_size = 18
 thresholds = [i / 100 for i in range(1, 6)]
 #ranked_results = np.zeros((len(thresholds), 9, 3))
 roc_aucs = np.zeros((len(thresholds), 9))
@@ -129,9 +129,14 @@ ax.set_yticklabels(ax.get_yticklabels(), fontsize=font_size)
 ax.set_xlabel('False Discovery Rate (FDR)', fontsize=font_size)
 ax.set_ylabel('Number of performance tests', fontsize=font_size)
 
+
+legend_entries = ["dMaSIF", "PInet", "GLINTER", "ProteinMAE"]
+#plt.legend(legend_entries, loc='upper center', ncol=4, fontsize=font_size-4, bbox_to_anchor=(0.5, -0.15))
 plt.tight_layout()
 #Save figure
 if args.pp == "AA":
     plt.savefig(f'Fig06_ranked.png', dpi=600)
+    plt.savefig(f'Fig06_ranked.pdf')
 elif args.pp == "DL":
     plt.savefig(f'Fig09_ranked.png', dpi=600)
+    plt.savefig(f'Fig09_ranked.pdf')

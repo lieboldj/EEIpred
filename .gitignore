@@ -1,3 +1,11 @@
+alphafold/
+alphafold3/
+af_data/
+af3_data/
+seq_pairs_fasta/
+seq_pairs_json/
+msas/
+
 # PInet
 __pycache__/
 pinet.egg-info/
@@ -171,7 +179,11 @@ ppDL_models/dmasif/CLUST_old
 ppDL_models/dmasif/PISA
 ppDL_models/dmasif/EPPIC
 run_experiments/run_results_random.sh
-analyse_results/plots
+analyse_results/Novel_EEIs
+analyse_results/tables
+analyse_results/RL_distance_AlphaFold.py
+analyse_results/AF_vs_PDB
+analyse_results/Fig_RL_NatureCB.py
 
 # add example pdbs
 !dmasif/surface_data/raw/01-benchmark_pdbs/1efx_A.pdb
@@ -227,6 +239,12 @@ RRI_results_CLUST*
 get_RRI.sh
 quick_auroc.py
 ppDL_pickle.py
+ppDLxAI.py
+ppDL_BMC.py
+shuffle_eval.py
+extract_seq_from_pdb.py
+from_seq_to_json.py
+check_2_chain.py
 analyse_results/intermed_store
 *.csv
 *.pkl

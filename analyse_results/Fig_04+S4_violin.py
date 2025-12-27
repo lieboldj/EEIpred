@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Violin plot
     ################################
 
-    fontsize = 20
+    fontsize = 22
     # Set the font size of the plots
     plt.rcParams.update({'font.size': fontsize})
     # Plotting the violin plots
@@ -157,10 +157,10 @@ if __name__ == "__main__":
         for i in range(4):
             axes[i,d].text(0.5, 1.35, f"M-W U test (q-value): {q_values_mw[d*4+i]:.2e}", \
                            horizontalalignment='center', verticalalignment='center', \
-                            transform=axes[i,d].transAxes, fontsize=fontsize-2)
+                            transform=axes[i,d].transAxes, fontsize=fontsize)
             axes[i,d].text(0.5, 1.1, f"K-S test (q-value): {q_values_ks[d*4+i]:.2e}", \
                        horizontalalignment='center', verticalalignment='center',\
-                          transform=axes[i,d].transAxes, fontsize=fontsize-2)
+                          transform=axes[i,d].transAxes, fontsize=fontsize)
 
         # increase distance between subplots
         plt.subplots_adjust(hspace=1)
@@ -180,13 +180,14 @@ if __name__ == "__main__":
 
 
     # add title above the text
-    axes[0,0].text(0.5, 1.6, '$D_{Con}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,0].transAxes, fontsize=fontsize +4)
-    axes[0,1].text(0.5, 1.6, '$D_{Engy}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,1].transAxes, fontsize=fontsize +4)
-    axes[0,2].text(0.5, 1.6, '$D_{Evol}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,2].transAxes, fontsize=fontsize +4)
+    axes[0,0].text(0.5, 1.6, '$D_{Con}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,0].transAxes, fontsize=fontsize +6)
+    axes[0,1].text(0.5, 1.6, '$D_{Engy}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,1].transAxes, fontsize=fontsize +6)
+    axes[0,2].text(0.5, 1.6, '$D_{Evol}$', horizontalalignment='center', verticalalignment='center', transform=axes[0,2].transAxes, fontsize=fontsize +6)
 
     plt.tight_layout()
     #plt.savefig(f"plots/{dataset}_violin_norm_Aug.pdf")
     plt.savefig(f"Fig4.png", dpi=600)
+    plt.savefig(f"Fig4.pdf")
  
     plt.close()
   

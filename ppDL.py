@@ -272,7 +272,7 @@ if optn.mode == "test":
 
         pos = np.asarray(pos)
         neg = np.asarray(neg)
-        if optn.dataset == "EXAMPLE":
+        if optn.dataset == "CLUST_PISA":
             print("pair\t\t\t\t\t\t\tprediction\tlabel")
             for i in results_per_fold:
                 print(i[0], i[1], i[2])
@@ -313,15 +313,15 @@ if optn.mode == "test":
         elif optn.method == "glinter":
             optn.method = "GLINTER"
 
-        if optn.eval_modus == "test_set":
-            np.save("results/{}_DL/{}_test_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-            np.save("results/{}_DL/{}_test_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
-        elif optn.eval_modus == "train_set":
-            np.save("results/{}_DL/{}_train_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-            np.save("results/{}_DL/{}_train_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
-        elif optn.eval_modus == "val_set":
-            np.save("results/{}_DL/{}_val_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
-            np.save("results/{}_DL/{}_val_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        # if optn.eval_modus == "test_set":
+        #     np.save("results/{}_DL/{}_test_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+        #     np.save("results/{}_DL/{}_test_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        # elif optn.eval_modus == "train_set":
+        #     np.save("results/{}_DL/{}_train_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+        #     np.save("results/{}_DL/{}_train_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
+        # elif optn.eval_modus == "val_set":
+        #     np.save("results/{}_DL/{}_val_pos_fold{}.npy".format(optn.method, optn.dataset, cv_idx), pos)
+        #     np.save("results/{}_DL/{}_val_neg_fold{}.npy".format(optn.method, optn.dataset, cv_idx), neg)
 
         if optn.method == "dMaSIF":
             optn.method = "dmasif"

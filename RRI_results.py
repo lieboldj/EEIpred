@@ -27,6 +27,9 @@ if __name__ == "__main__":
     if "pretrained" in dataset:
         pre_trained = "pretrained_"
         dataset = dataset.replace("pretrained_", "")
+    
+    if sys.argv[1] =="CLUST_CONTACT_AF_V6":
+        dataset = "CLUST_CONTACT"
 
     filename_pos = path_to_data + "{}/{}_positives.txt".format(dataset, dataset)
     filename_neg = path_to_data + "{}/{}_negatives.txt".format(dataset, dataset)
@@ -67,6 +70,8 @@ if __name__ == "__main__":
         if method != "GLINTER":
             df_test = pd.read_csv(path_to_data + "{}/{}{}.txt".format(dataset, mode, i), sep='_', header=None)
             df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}.txt".format(dataset, mode, i), sep='\t', header=None)
+            # df_test = pd.read_csv(path_to_data + "{}/{}{}_paf.txt".format(dataset, mode, i), sep='_', header=None)
+            # df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}_paf.txt".format(dataset, mode, i), sep='\t', header=None)
         else:
             df_test = pd.read_csv(path_to_data + "{}/{}{}_glinter.txt".format(dataset, mode, i), sep='_', header=None)
             df_testinfo = pd.read_csv(path_to_data + "{}/{}_info{}_glinter.txt".format(dataset, mode, i), sep='\t', header=None)
@@ -115,7 +120,8 @@ if __name__ == "__main__":
             sample_pos_count = 0
             prot_pdb1 = uniprot1 + "_" + pdb + "_" + chain1
             prot_pdb2 = uniprot2 + "_" + pdb + "_" + chain2
-
+            if sys.argv[1] =="CLUST_CONTACT_AF_V6":
+                dataset = "CLUST_CONTACT_AF_V6"
             # save each exon pair in protein_pair_random in npy file
             for exon1 in exon1_index.keys():
                 for exon2 in exon2_index.keys():
@@ -179,6 +185,8 @@ if __name__ == "__main__":
         # make dir if not exists
         if method == "dmasif":
             method = "dMaSIF"
+        if sys.argv[1] =="CLUST_CONTACT_AF_V6":
+            dataset = "CLUST_CONTACT"
         if cutoff == 6:
             if not os.path.exists(f"results/{method}_AA/"):
                 os.makedirs(f"results/{method}_AA/")

@@ -35,6 +35,7 @@ if __name__ == "__main__":
         print("Fold: ",i)
         inter_exons = []
         non_inter_exons = []
+        print("Path: ", "{}/results/{}{}/fold{}/{}/*".format(method_path, pre_trained, dataset,i,mode))
         all_exons = glob.glob("{}/results/{}{}/fold{}/{}/*".format(method_path, pre_trained, dataset,i,mode))
         all_exons = sorted(all_exons)
 
@@ -81,8 +82,8 @@ if __name__ == "__main__":
             os.makedirs("results/{}_Max/".format(method))
 
         if mode == "test":
-            np.save("results/{}_Max/{}_test_pos_fold{}.npy".format(method,dataset,i), inter_exons)
-            np.save("results/{}_Max/{}_test_neg_fold{}.npy".format(method,dataset,i), non_inter_exons)
+            np.save("results/{}_Max/pdbV6_{}_test_pos_fold{}.npy".format(method,dataset,i), inter_exons)
+            np.save("results/{}_Max/pdbV6_{}_test_neg_fold{}.npy".format(method,dataset,i), non_inter_exons)
         elif mode == "val":
             np.save("results/{}_Max/{}_val_pos_fold{}.npy".format(method, dataset, i), inter_exons)
             np.save("results/{}_Max/{}_val_neg_fold{}.npy".format(method, dataset, i), non_inter_exons)

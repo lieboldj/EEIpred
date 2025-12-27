@@ -6,7 +6,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 
 # pick the dataset you want to plot, switch to CLUST_EPPIC or CLUST_CONTACT for further analysis
 # set -p to AA for RRI and to DL for EEI using PPDL
-pick_dataset = "CLUST_CONTACT"
+pick_dataset = "CLUST_PISA"
 
 # Given functions
 def precision(TP, FP):
@@ -42,7 +42,7 @@ def get_results(alphas, pos_dist, neg_dist, background):
 
 parser = argparse.ArgumentParser(description='Test significance.')
 parser.add_argument('-m', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')
-parser.add_argument('-p', '--pp', type=str, default="DL", help='Preprocessings to test')
+parser.add_argument('-p', '--pp', type=str, default="AA", help='Preprocessings to test')
 parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=bool, default=True, help='Sampling on or off')
 parser.add_argument('-a', '--auroc', type=bool, default=False, help='Set to True if you want to know AUROC and AUPRC')
@@ -56,7 +56,7 @@ evals = ["Precision", "Recall", "Fscore", "MCC"]
 
 get_index_dataset = datasets.index(pick_dataset)
 
-font_size = 16
+font_size = 18
 thresholds = [i / 100 for i in range(1, 6)]
 #ranked_results = np.zeros((len(thresholds), 9, 3))
 roc_aucs = np.zeros((len(thresholds), 9))
@@ -222,12 +222,14 @@ plt.tight_layout()
 # Save the figure
 if args.pp == "DL":
     if pick_dataset == "CLUST_CONTACT":
-        plt.savefig(f'Fig09_{pick_dataset}.png', dpi=600)
+        plt.savefig(f'Fig9b.png', dpi=600)
+        plt.savefig(f'Fig9b.pdf')
     else:
         plt.savefig(f'FigS9_{pick_dataset}.png', dpi=600)
 elif args.pp == "AA":
     if pick_dataset == "CLUST_PISA":
         plt.savefig(f'Fig06_{pick_dataset}.png', dpi=600)
+        plt.savefig(f'Fig06_{pick_dataset}.pdf')
     else:
         plt.savefig(f'FigS6_{pick_dataset}.png', dpi=600)
 

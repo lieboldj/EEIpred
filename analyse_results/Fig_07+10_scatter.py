@@ -12,7 +12,7 @@ from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curv
 # set -p to AA,DL for RRI copmarision to EEI using PPDL or Max,DL for EEI using PPMax compared to PPDL
 parser = argparse.ArgumentParser(description='Test significance.')
 parser.add_argument('-mh', '--method', type=str, default="dMaSIF,PInet,GLINTER,ProteinMAE", help='Methods to test')
-parser.add_argument('-p', '--pp', type=str, default="Max,DL", help='Preprocessings to test')
+parser.add_argument('-p', '--pp', type=str, default="AA,DL", help='Preprocessings to test')
 parser.add_argument('-d', '--dataset', type=str, default="CLUST_CONTACT,CLUST_PISA,CLUST_EPPIC", help='Datasets to test')
 parser.add_argument('-s', '--sampling', type=int, default=0, help='Sampling on or off, is recommanded for AU-ROC')
 args = parser.parse_args()
@@ -131,8 +131,12 @@ leg = plt.legend(legend_elements, labels, loc='lower left', fontsize=fontsize-3,
 if args.pp == "Max,DL":
     plt.savefig(f"Fig07.png", dpi=600, \
                 bbox_extra_artists=(leg,), bbox_inches='tight')
+    plt.savefig(f"Fig07.pdf", \
+                bbox_extra_artists=(leg,), bbox_inches='tight')
 elif args.pp == "AA,DL":
     plt.savefig(f"Fig10.png", dpi=600, \
+                bbox_extra_artists=(leg,), bbox_inches='tight')
+    plt.savefig(f"Fig10.pdf", \
                 bbox_extra_artists=(leg,), bbox_inches='tight')
 
 plt.close()
