@@ -246,6 +246,7 @@ extract_seq_from_pdb.py
 from_seq_to_json.py
 check_2_chain.py
 analyse_results/intermed_store
+dmasif/run_reduce_AFDB.py
 *.csv
 *.pkl
 *.tsv

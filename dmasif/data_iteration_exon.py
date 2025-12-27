@@ -140,7 +140,8 @@ def save_residue_max_per_exon(protein_pair_id, P1, P2, args, protein1, protein2,
     if os.path.exists(f"{exon_dir}/{protein1}_{pdb_id1}.txt"):
         data1 = np.genfromtxt(f"{exon_dir}/{protein1}_{pdb_id1}.txt", delimiter="\t", dtype=str, skip_header=1)
     else:
-        print("exon mapping files missing")
+        print(f"exon mapping files missing for {protein1}_{pdb_id1}")
+        
 
     # create dict which residue belongs to which exon from 1
     exon_dict1 = {int(line[-1]): line[0] for line in data1 if line[-1] != "-"}
@@ -150,8 +151,8 @@ def save_residue_max_per_exon(protein_pair_id, P1, P2, args, protein1, protein2,
     if os.path.exists(f"{exon_dir}/{protein2}_{pdb_id2}.txt"):
         data2 = np.genfromtxt(f"{exon_dir}/{protein2}_{pdb_id2}.txt", delimiter="\t", dtype=str, skip_header=1)
     else:
-        print("exon mapping files missing")
-    
+        print(f"exon mapping files missing for {protein2}_{pdb_id2}")
+
     # create dict which residue belongs to which exon from 2
     exon_dict2 = {int(line[-1]): line[0] for line in data2 if line[-1] != "-"}
     exons2 = {v: [k for k, val in exon_dict2.items() if val == v] for v in set(exon_dict2.values())}

@@ -228,12 +228,12 @@ class PairData(Data):
 
 def load_protein_pair(pdb_id, data_dir,single_pdb=True):
     """Loads a protein surface mesh and its features"""
-    pspl = pdb_id.split("\t")
-    #p1_id = pspl[0] + "_" + pspl[1]
-    #p2_id = pspl[0] + "_" + pspl[2]
+    pspl = pdb_id.split("_")
+    p1_id = pspl[0] + "_" + pspl[1]
+    p2_id = pspl[0] + "_" + pspl[2]
 
-    p1_id = pspl[0]
-    p2_id = pspl[1]
+    #p1_id = pspl[0]
+    #p2_id = pspl[1]
 
     p1 = load_protein_npy(p1_id, data_dir, center=False,single_pdb=single_pdb)
     p2 = load_protein_npy(p2_id, data_dir, center=False,single_pdb=single_pdb)
@@ -280,12 +280,13 @@ class ProteinPairsSurfaces(InMemoryDataset):
         print(fold_no)
         pdb_dir = Path("surface_data") / "raw" / "01-benchmark_pdbs"
         #surf_dir = Path(self.root) / "raw" / "01-benchmark_surfaces"
-        #protein_dir = Path("surface_data") / "raw" / "01-benchmark_surfaces_npy"
-        protein_dir = Path("surface_data") / "raw" / "01-af_npys"
+        protein_dir = Path("surface_data") / "raw" / "01-benchmark_surfaces_npy"
+        #protein_dir = Path("surface_data") / "raw" / "01-af_npys"
+        #protein_dir = Path("surface_data") / "raw" / "01-AFDB_npys_V6"
         
         ##################change THIS LINE PER DATASET##################
         
-        lists_dir = Path('../data_collection/cv_splits/BioGRID') 
+        lists_dir = Path('../data_collection/cv_splits/EXAMPLE') 
 
         if not protein_dir.exists():
             protein_dir.mkdir(parents=False, exist_ok=False)
@@ -294,6 +295,9 @@ class ProteinPairsSurfaces(InMemoryDataset):
         with open(lists_dir / f"train{fold_no}.txt") as f_tr, open(
             lists_dir / f"test{fold_no}.txt"
         ) as f_ts, open(lists_dir / f"val{fold_no}.txt") as f_val:
+        # with open(lists_dir / f"train{fold_no}_af.txt") as f_tr, open(
+        #     lists_dir / f"test{fold_no}_paf.txt"
+        # ) as f_ts, open(lists_dir / f"val{fold_no}_af.txt") as f_val:
             training_pairs_list = f_tr.read().splitlines()
             testing_pairs_list = f_ts.read().splitlines()
             validation_pairs_list = f_val.read().splitlines()

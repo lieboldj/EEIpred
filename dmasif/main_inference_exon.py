@@ -86,11 +86,12 @@ lists_dir = Path("../data_collection/cv_splits/")
 # change path to your pdb files including hydrogen atoms
 ##############################################################################
 pdb_dir = Path("surface_data/raw/01-benchmark_pdbs/")
-#pdb_dir = Path("surface_data/raw/01-af_pdbs/")
+#pdb_dir = Path("surface_data/raw/01-AFDB_reduced_V6/")
 dataset_name = args.experiment_name.split("/")[0]
 # load files ones
 # change TRAIN TEST HERE
 with open(lists_dir / f"{dataset_name}/{mode}_info{args.train_no}.txt") as f_tr:
+#with open(lists_dir / f"{dataset_name}/{mode}_info{args.train_no}_paf.txt") as f_tr:
     testing_protein_names = f_tr.read().splitlines()
 
 if not os.path.exists(f"results/{dataset_name}/fold{args.train_no}/{mode}/"):
