@@ -82,5 +82,4 @@ This work is licensed under a Creative Commons Attribution 4.0 International Pub
 
 
 ## Reference
-Liebold J, Del Moral Morales A, Manalastas-Cantos K, Tsoy O, Kurtz S, Baumbach J, Newaz K (2024). The power and limits of protein 3D structure-based exon-exon interaction prediction. [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.03.01.582917v1)
-
+Jeanine Liebold, Aylin Del Moral-Morales, Karen Manalastas-Cantos, Olga Tsoy, Stefan Kurtz, Jan Baumbach, Khalique Newaz, The power and limits of predicting inter-protein exon-exon interactions using protein 3D structures, Bioinformatics Advances, 2026;, vbag032, [DOI] https://doi.org/10.1093/bioadv/vbag032
