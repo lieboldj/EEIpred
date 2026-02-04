@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL of the zip file to download
-url_data="https://figshare.com/ndownloader/files/55611968"
+url_data="https://figshare.com/ndownloader/files/61634389"
 url_pretrained="https://figshare.com/ndownloader/files/55611941"
 url_data_for_plots="https://figshare.com/ndownloader/files/55699016"
 
@@ -12,6 +12,13 @@ download_dir="."
 wget -O "$download_dir/datasets.zip" "$url_data"
 wget -O "$download_dir/pre-trained.zip" "$url_pretrained"
 wget -O "$download_dir/data_for_plots.zip" "$url_data_for_plots"
+
+# If you face problems with downloading from wget, please try using curl:
+#curl -L -o datasets.zip "$url_data"
+#curl -L -o pre-trained.zip "$url_pretrained"
+#curl -L -o data_for_plots.zip "$url_data_for_plots"
+
+# Else, you can manually download the files from the above URLs and place them in the download_dir
 
 # unzip the two files
 # url_data is called "datasets.zip"
@@ -29,6 +36,7 @@ mv "$download_dir/data_for_plots/"* "$download_dir/analyse_results/"
 
 # move dataset/CLUST_CONTACT, dataset/CLUST_EPPIC, dataset/CLUST_PISA to data_collection/cv_splits
 mv "$download_dir/dataset/CLUST_CONTACT" "$download_dir/data_collection/cv_splits/"
+mv "$download_dir/dataset/CLUST_CONTACT_SMALL" "$download_dir/data_collection/cv_splits/"
 mv "$download_dir/dataset/CLUST_EPPIC" "$download_dir/data_collection/cv_splits/"
 mv "$download_dir/dataset/CLUST_PISA" "$download_dir/data_collection/cv_splits/"
 mv "$download_dir/dataset/BioGRID" "$download_dir/data_collection/cv_splits/"
